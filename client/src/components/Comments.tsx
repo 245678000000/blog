@@ -1,10 +1,6 @@
 import { useEffect, useRef } from "react";
 import { useTheme } from "@/contexts/ThemeContext";
 
-interface CommentsProps {
-  slug: string; // 文章 slug，用于区分不同文章的评论
-}
-
 /**
  * Giscus 评论组件
  *
@@ -16,7 +12,7 @@ interface CommentsProps {
  *
  * 获取这些值: https://giscus.app/
  */
-export function Comments({ slug }: CommentsProps) {
+export function Comments() {
   const { theme } = useTheme();
   const containerRef = useRef<HTMLDivElement>(null);
 
@@ -49,8 +45,7 @@ export function Comments({ slug }: CommentsProps) {
     script.setAttribute("data-repo-id", giscusRepoId);
     script.setAttribute("data-category", giscusCategory);
     script.setAttribute("data-category-id", giscusCategoryId);
-    script.setAttribute("data-mapping", "specific");
-    script.setAttribute("data-term", slug);
+    script.setAttribute("data-mapping", "pathname");
     script.setAttribute("data-strict", "0");
     script.setAttribute("data-reactions-enabled", "1");
     script.setAttribute("data-emit-metadata", "0");
@@ -73,7 +68,7 @@ export function Comments({ slug }: CommentsProps) {
         }
       }
     };
-  }, [slug, theme, isConfigured, giscusRepo, giscusRepoId, giscusCategory, giscusCategoryId]);
+  }, [theme, isConfigured, giscusRepo, giscusRepoId, giscusCategory, giscusCategoryId]);
 
   // 主题切换时更新 giscus 主题
   useEffect(() => {

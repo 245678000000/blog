@@ -152,7 +152,7 @@ export default function ArticlePage() {
           </div>
 
           {/* Comments */}
-          <Comments slug={slug} />
+          <Comments />
 
           {/* Article Navigation (Prev/Next) */}
           <ArticleNavigation prev={adjacentArticles.prev} next={adjacentArticles.next} />
