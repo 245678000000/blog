@@ -33,7 +33,7 @@ const timeline = [
   },
   {
     year: "2025.11",
-    title: ""大学生 AI 赋能司法"创新挑战赛",
+    title: '"大学生 AI 赋能司法"创新挑战赛',
     organization: "项目负责人",
     description: "探索 LLM 在司法行政领域的垂直应用，验证长文本逻辑分析潜力",
     icon: Award,
