@@ -1,0 +1,11 @@
+# robots.txt - 告诉搜索引擎可以爬取哪些内容
+
+User-agent: *
+Allow: /
+
+# 禁止爬取 API 端点
+Disallow: /api/
+
+# 站点地图 - 动态生成
+# 注意: 部署时需将下面的域名替换为实际域名
+# Sitemap: https://your-actual-domain.com/sitemap.xml
