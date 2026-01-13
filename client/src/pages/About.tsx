@@ -147,7 +147,7 @@ export default function About() {
                     </a>
                   </Button>
                   <Button variant="outline" className="rounded-full" asChild>
-                    <a href="https://github.com" target="_blank" rel="noopener noreferrer">
+                    <a href="https://github.com/245678000000" target="_blank" rel="noopener noreferrer">
                       <Github className="w-4 h-4 mr-2" />
                       GitHub
                     </a>

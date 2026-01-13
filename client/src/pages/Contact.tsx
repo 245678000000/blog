@@ -27,7 +27,7 @@ const socialLinks = [
   {
     name: "GitHub",
     icon: Github,
-    href: "https://github.com",
+    href: "https://github.com/245678000000",
     label: "GitHub",
     description: "查看我的开源项目",
   },
