@@ -34,7 +34,7 @@ const socialLinks = [
   {
     name: "Linux.do",
     icon: MessageSquare,
-    href: "https://linux.do",
+    href: "https://linux.do/u/user400/summary",
     label: "Linux.do 3级",
     description: "技术社区交流",
   },

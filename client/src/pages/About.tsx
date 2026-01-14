@@ -153,7 +153,7 @@ export default function About() {
                     </a>
                   </Button>
                   <Button variant="outline" className="rounded-full" asChild>
-                    <a href="https://linux.do" target="_blank" rel="noopener noreferrer">
+                    <a href="https://linux.do/u/user400/summary" target="_blank" rel="noopener noreferrer">
                       <MessageSquare className="w-4 h-4 mr-2" />
                       Linux.do
                     </a>
