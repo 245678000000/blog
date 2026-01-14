@@ -6,6 +6,7 @@ readTime: "12 分钟"
 description: "一份关于 Claude Code 最强大功能的综合指南，从快速快捷键到高级 Agent 模式。"
 image: "/images/article-1.jpg"
 published: true
+tags: ["Claude", "AI", "编程工具", "效率"]
 ---
 
 # Claude 降临：Claude Code 的 31 天

@@ -15,7 +15,7 @@ if [ -z "$TITLE" ]; then
 fi
 
 # 创建文章文件
-ARTICLE_PATH="client/public/articles/${SLUG}.md"
+ARTICLE_PATH="articles/${SLUG}.md"
 
 cat > "$ARTICLE_PATH" << EOF
 ---
@@ -47,5 +47,5 @@ echo ""
 echo "📝 下一步:"
 echo "1. 编辑文章内容: ${ARTICLE_PATH}"
 echo "2. 设置 published: true 来发布"
-echo "3. 更新 articles.json 添加文章元数据"
+echo "3. 运行 npm run sync 同步文章并更新元数据"
 echo "4. git add . && git commit -m '新文章: ${TITLE}' && git push"
