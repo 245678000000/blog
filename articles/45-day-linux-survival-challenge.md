@@ -4,7 +4,7 @@ date: 2026-01-19
 category: "Linux"
 readTime: "8 分钟"
 description: "记录从 Windows 转战 Linux 的 45 天生存挑战，涵盖 Pop!_OS 折腾经历、驱动问题解决及工具链构建心得。"
-image: "/images/linux-challenge.png"
+image: "/images/linux-challenge.jpg"
 published: true
 tags: ["Linux", "Pop!_OS", "Workflow", "Nvidia"]
 ---
