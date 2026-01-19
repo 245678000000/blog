@@ -8,5 +8,15 @@
     "description": "一份关于 Claude Code 最强大功能的综合指南，从快速快捷键到高级 Agent 模式。",
     "image": "/images/article-1.jpg",
     "published": true
+  },
+  {
+    "slug": "my-2025",
+    "title": "我的 2025：迷茫、行走与新生",
+    "date": "2026-01-19",
+    "category": "随笔",
+    "readTime": "8 分钟",
+    "description": "2025年的年度总结，关于考研、旅行、迷茫与成长的故事。",
+    "image": "/images/2025-cover.png",
+    "published": true
   }
 ]

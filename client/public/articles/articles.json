@@ -16,6 +16,17 @@
     ]
   },
   {
+    "slug": "关于我的2025",
+    "title": "我的 2025：迷茫、行走与新生",
+    "date": "2026-01-19",
+    "category": "随笔",
+    "readTime": "8 分钟",
+    "description": "2025年的年度总结，关于考研、旅行、迷茫与成长的故事。",
+    "image": "/images/2025-cover.png",
+    "published": true,
+    "tags": []
+  },
+  {
     "slug": "advent-of-claude-2025",
     "title": "Claude 降临：Claude Code 的 31 天",
     "date": "2026-01-01",
