@@ -205,23 +205,44 @@ export default function Home() {
               <div className="flex flex-wrap gap-2 mb-6">
                 <Badge className="bg-primary/20 text-primary border-0">法学硕士</Badge>
                 <Badge className="bg-primary/20 text-primary border-0">AI Native</Badge>
-                <Badge className="bg-primary/20 text-primary border-0">Linux.do 3级</Badge>
+                <Badge className="bg-primary/20 text-primary border-0">SkillsHub</Badge>
+                <Badge className="bg-primary/20 text-primary border-0">RAG / Harness</Badge>
               </div>
 
               <div className="space-y-4 text-lg text-muted-foreground leading-relaxed">
                 <p>
-                  上海师范大学法律硕士（国际法方向）在读。我不满足于文档工作，热衷于用 <strong className="text-foreground">Code 和 AI 工具</strong>解决真实世界问题。
+                  上海师范大学法律硕士（国际法方向）在读。把法律方法论拧进 AI 工程：做{" "}
+                  <a
+                    href="https://legal-skillshub.vercel.app/"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-primary font-medium underline-offset-4 hover:underline"
+                  >
+                    Legal SkillsHub
+                  </a>
+                  ，也落地 <strong className="text-foreground">RAG 知识库</strong>、垂直{" "}
+                  <strong className="text-foreground">Chatbot</strong> 与{" "}
+                  <strong className="text-foreground">Agent Harness</strong>。
                 </p>
                 <p>
-                  擅长使用 <strong className="text-foreground">Cursor、Claude</strong> 等 AI 工具进行开发，熟悉 LangChain/CoT 思维链设计。
-                  针对复杂逻辑场景（如法律/合规）进行 Few-shot 优化，消除模型幻觉。
+                  擅长 Cursor / Claude 等 AI 原生开发，熟悉检索增强、技能包体系与工作流编排。
+                  法学训练带来的边界意识，让 Agent 不只会生成，还知道何时引用、何时停、何时让人复核。
                 </p>
                 <p>
-                  法学背景赋予了我极强的逻辑推理与边界情况考虑能力，非常契合 Agent 设计需求。
+                  <em className="text-foreground/80">Idea 能快速变成可演示、可复用、可分发的东西。</em>
                 </p>
               </div>
 
               <div className="flex flex-wrap gap-4 mt-8">
+                <Button variant="outline" className="rounded-full hover:text-primary hover:border-primary px-6" asChild>
+                  <a
+                    href="https://legal-skillshub.vercel.app/"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    SkillsHub
+                  </a>
+                </Button>
                 <Button variant="outline" className="rounded-full hover:text-primary hover:border-primary px-6" asChild>
                   <a href="mailto:xingpeng278@aliyun.com">
                     <Mail className="mr-2 h-4 w-4" /> 联系我
