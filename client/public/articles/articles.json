@@ -1,5 +1,23 @@
 [
   {
+    "slug": "rag-feishu-wiki-tutorial",
+    "title": "RAG 全流程实现 + 飞书 WIKI 文档接入完整教程",
+    "date": "2026-07-14",
+    "category": "指南",
+    "readTime": "15 分钟",
+    "description": "使用 Java + LangChain4j 搭建完整 RAG 知识库问答，并接入飞书 WIKI 实现定时同步、增量更新与数据一致性清理。",
+    "image": "/images/article-rag-feishu.jpg",
+    "published": true,
+    "tags": [
+      "RAG",
+      "LangChain4j",
+      "飞书",
+      "Java",
+      "Spring Boot",
+      "向量数据库"
+    ]
+  },
+  {
     "slug": "antigravity-cli-experience",
     "title": "Antigravity CLI 一个月深度使用体验：Gemini CLI 重度用户的真实分享与实用技巧",
     "date": "2026-06-12",
