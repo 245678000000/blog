@@ -60,7 +60,7 @@ export default function Contact() {
     setIsSubmitting(true);
 
     // 模拟提交（实际项目中可以对接邮件服务）
-    await new Promise((resolve) => setTimeout(resolve, 1000));
+    await new Promise((resolve) => setTimeout(resolve, 10));
 
     // 使用 mailto 链接作为备用方案
     const mailtoLink = `mailto:xingpeng278@aliyun.com?subject=${encodeURIComponent(
@@ -112,7 +112,7 @@ export default function Contact() {
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <form onSubmit={handleSubmit} className="space-y-4">
+              <form onSubmit={handleSubmit} className="space-y-4" noValidate>
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
                     <Label htmlFor="name">姓名 *</Label>
@@ -148,7 +148,7 @@ export default function Contact() {
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="message">消息内容 *</Label>
+                  <Label htmlFor="message">留言 *</Label>
                   <Textarea
                     id="message"
                     placeholder="写下你想说的..."

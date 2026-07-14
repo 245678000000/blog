@@ -2,8 +2,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { SEO } from "@/components/SEO";
 import { useEffect, useState } from "react";
-import { useSearch } from "wouter";
-import { Link } from "wouter";
+import { useSearch, useLocation, Link } from "wouter";
 import {
   getPublishedArticles,
   getAllTags,
@@ -14,15 +13,14 @@ import { Calendar, Tag, FolderOpen, X } from "lucide-react";
 
 export default function Archive() {
   const searchString = useSearch();
+  const [, setLocation] = useLocation();
   const params = new URLSearchParams(searchString);
-  const initialTag = params.get("tag") || "";
-  const initialCategory = params.get("category") || "";
+  const selectedTag = params.get("tag") || "";
+  const selectedCategory = params.get("category") || "";
 
   const [articles, setArticles] = useState<Article[]>([]);
   const [tags, setTags] = useState<{ tag: string; count: number }[]>([]);
   const [categories, setCategories] = useState<{ category: string; count: number }[]>([]);
-  const [selectedTag, setSelectedTag] = useState(initialTag);
-  const [selectedCategory, setSelectedCategory] = useState(initialCategory);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -58,10 +56,28 @@ export default function Archive() {
   // 年份倒序排列
   const sortedYears = Object.keys(articlesByYear).sort((a, b) => b.localeCompare(a));
 
+  const updateFilters = (tag: string | null, category: string | null) => {
+    const newParams = new URLSearchParams(searchString);
+    if (tag !== null) {
+      if (tag === "") {
+        newParams.delete("tag");
+      } else {
+        newParams.set("tag", tag);
+      }
+    }
+    if (category !== null) {
+      if (category === "") {
+        newParams.delete("category");
+      } else {
+        newParams.set("category", category);
+      }
+    }
+    const newQuery = newParams.toString();
+    setLocation(`/archive${newQuery ? `?${newQuery}` : ""}`);
+  };
+
   const clearFilters = () => {
-    setSelectedTag("");
-    setSelectedCategory("");
-    // 更新 URL
+    setLocation("/archive");
     window.history.replaceState({}, "", "/archive");
   };
 
@@ -109,7 +125,7 @@ export default function Archive() {
                 <Badge
                   variant="secondary"
                   className="bg-primary/20 text-primary cursor-pointer hover:bg-primary/30"
-                  onClick={() => setSelectedTag("")}
+                  onClick={() => updateFilters("", null)}
                 >
                   <Tag className="w-3 h-3 mr-1" />
                   {selectedTag}
@@ -120,7 +136,7 @@ export default function Archive() {
                 <Badge
                   variant="secondary"
                   className="bg-primary/20 text-primary cursor-pointer hover:bg-primary/30"
-                  onClick={() => setSelectedCategory("")}
+                  onClick={() => updateFilters(null, "")}
                 >
                   <FolderOpen className="w-3 h-3 mr-1" />
                   {selectedCategory}
@@ -149,7 +165,7 @@ export default function Archive() {
                       ? "rounded-full bg-primary text-primary-foreground hover:bg-primary/90"
                       : "rounded-full hover:bg-secondary"
                   }
-                  onClick={() => setSelectedCategory(selectedCategory === category ? "" : category)}
+                  onClick={() => updateFilters(null, selectedCategory === category ? "" : category)}
                 >
                   {category}
                   <span className="ml-1.5 text-xs opacity-60">({count})</span>
@@ -172,7 +188,7 @@ export default function Archive() {
                       ? "bg-primary text-primary-foreground"
                       : "bg-secondary/50 text-muted-foreground hover:bg-primary/20 hover:text-primary"
                   }`}
-                  onClick={() => setSelectedTag(selectedTag === tag ? "" : tag)}
+                  onClick={() => updateFilters(selectedTag === tag ? "" : tag, null)}
                 >
                   #{tag}
                   <span className="ml-1 opacity-60">({count})</span>

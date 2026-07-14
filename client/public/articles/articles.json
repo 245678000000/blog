@@ -1,5 +1,22 @@
 [
   {
+    "slug": "antigravity-cli-experience",
+    "title": "Antigravity CLI 一个月深度使用体验：Gemini CLI 重度用户的真实分享与实用技巧",
+    "date": "2026-06-12",
+    "category": "指南",
+    "readTime": "8 分钟",
+    "description": "Google DeepMind 技术团队成员 Jack Wotherspoon 分享的 Antigravity CLI 深度使用技巧、异步多代理工作流及从 Gemini CLI 平滑迁移指南。",
+    "image": "/images/article-antigravity.jpg",
+    "published": true,
+    "tags": [
+      "Antigravity",
+      "Gemini",
+      "CLI",
+      "AI",
+      "编程工具"
+    ]
+  },
+  {
     "slug": "45-day-linux-survival-challenge",
     "title": "45 天 Linux 生存挑战",
     "date": "2026-01-19",

@@ -23,7 +23,7 @@ export function calculateReadTime(content: string): string {
   const chineseChars = (content.match(/[\u4e00-\u9fa5]/g) || []).length;
   // 统计英文单词（移除中文后按空格分割）
   const englishText = content.replace(/[\u4e00-\u9fa5]/g, " ");
-  const words = englishText.split(/\s+/).filter((w) => w.length > 0).length;
+  const words = englishText.split(/\s+/).filter(w => w.length > 0).length;
 
   // 计算分钟数
   const minutes = Math.ceil(chineseChars / 300 + words / 200);
@@ -40,7 +40,10 @@ export interface ArticleWithContent extends Article {
 let articlesCache: Article[] | null = null;
 
 // 解析 frontmatter 的文章内容
-export function parseArticleFrontmatter(markdown: string): { data: Article; content: string } {
+export function parseArticleFrontmatter(markdown: string): {
+  data: Article;
+  content: string;
+} {
   const frontmatterRegex = /^---\s*\n([\s\S]*?)\n---\s*\n([\s\S]*)$/;
   const match = markdown.match(frontmatterRegex);
 
@@ -86,7 +89,10 @@ export function parseArticleFrontmatter(markdown: string): { data: Article; cont
     let value = line.slice(colonIndex + 1).trim();
 
     // 移除引号
-    if ((value.startsWith('"') && value.endsWith('"')) || (value.startsWith("'") && value.endsWith("'"))) {
+    if (
+      (value.startsWith('"') && value.endsWith('"')) ||
+      (value.startsWith("'") && value.endsWith("'"))
+    ) {
       value = value.slice(1, -1);
     }
 
@@ -110,7 +116,7 @@ export function parseArticleFrontmatter(markdown: string): { data: Article; cont
         data.image = value;
         break;
       case "published":
-        data.published = value === "true" || value === true;
+        data.published = value === "true";
         break;
       case "tags":
         // 解析 tags 数组（格式: [tag1, tag2] 或 tag1, tag2）
@@ -118,13 +124,13 @@ export function parseArticleFrontmatter(markdown: string): { data: Article; cont
           data.tags = value
             .slice(1, -1)
             .split(",")
-            .map((t) => t.trim().replace(/["']/g, ""))
-            .filter((t) => t.length > 0);
+            .map(t => t.trim().replace(/["']/g, ""))
+            .filter(t => t.length > 0);
         } else {
           data.tags = value
             .split(",")
-            .map((t) => t.trim())
-            .filter((t) => t.length > 0);
+            .map(t => t.trim())
+            .filter(t => t.length > 0);
         }
         break;
     }
@@ -134,7 +140,9 @@ export function parseArticleFrontmatter(markdown: string): { data: Article; cont
 }
 
 // 获取文章内容（从 .md 文件）
-export async function getArticleContent(slug: string): Promise<ArticleWithContent | null> {
+export async function getArticleContent(
+  slug: string
+): Promise<ArticleWithContent | null> {
   try {
     const response = await fetch(`/articles/${slug}.md`);
     if (!response.ok) {
@@ -183,13 +191,13 @@ async function loadArticlesFromJson(): Promise<Article[]> {
 // 从 articles.json 动态加载，不再硬编码
 export async function getPublishedArticles(): Promise<Article[]> {
   const articles = await loadArticlesFromJson();
-  return articles.filter((a) => a.published);
+  return articles.filter(a => a.published);
 }
 
 // 根据 slug 获取文章元数据
 export async function getArticleBySlug(slug: string): Promise<Article | null> {
   const articles = await getPublishedArticles();
-  return articles.find((a) => a.slug === slug) || null;
+  return articles.find(a => a.slug === slug) || null;
 }
 
 // 获取相邻文章（用于上一篇/下一篇导航）
@@ -198,7 +206,7 @@ export async function getAdjacentArticles(currentSlug: string): Promise<{
   next: Article | null;
 }> {
   const articles = await getPublishedArticles();
-  const currentIndex = articles.findIndex((a) => a.slug === currentSlug);
+  const currentIndex = articles.findIndex(a => a.slug === currentSlug);
 
   if (currentIndex === -1) {
     return { prev: null, next: null };
@@ -206,7 +214,8 @@ export async function getAdjacentArticles(currentSlug: string): Promise<{
 
   return {
     prev: currentIndex > 0 ? articles[currentIndex - 1] : null,
-    next: currentIndex < articles.length - 1 ? articles[currentIndex + 1] : null,
+    next:
+      currentIndex < articles.length - 1 ? articles[currentIndex + 1] : null,
   };
 }
 
@@ -215,8 +224,8 @@ export async function getAllTags(): Promise<{ tag: string; count: number }[]> {
   const articles = await getPublishedArticles();
   const tagCounts = new Map<string, number>();
 
-  articles.forEach((article) => {
-    (article.tags || []).forEach((tag) => {
+  articles.forEach(article => {
+    (article.tags || []).forEach(tag => {
       tagCounts.set(tag, (tagCounts.get(tag) || 0) + 1);
     });
   });
@@ -229,16 +238,21 @@ export async function getAllTags(): Promise<{ tag: string; count: number }[]> {
 // 根据标签获取文章
 export async function getArticlesByTag(tag: string): Promise<Article[]> {
   const articles = await getPublishedArticles();
-  return articles.filter((a) => a.tags?.includes(tag));
+  return articles.filter(a => a.tags?.includes(tag));
 }
 
 // 获取所有分类及其文章数量
-export async function getAllCategories(): Promise<{ category: string; count: number }[]> {
+export async function getAllCategories(): Promise<
+  { category: string; count: number }[]
+> {
   const articles = await getPublishedArticles();
   const categoryCounts = new Map<string, number>();
 
-  articles.forEach((article) => {
-    categoryCounts.set(article.category, (categoryCounts.get(article.category) || 0) + 1);
+  articles.forEach(article => {
+    categoryCounts.set(
+      article.category,
+      (categoryCounts.get(article.category) || 0) + 1
+    );
   });
 
   return Array.from(categoryCounts.entries())
@@ -251,7 +265,7 @@ export async function getArticlesByYear(): Promise<Map<string, Article[]>> {
   const articles = await getPublishedArticles();
   const byYear = new Map<string, Article[]>();
 
-  articles.forEach((article) => {
+  articles.forEach(article => {
     const year = article.date.split("-")[0];
     if (!byYear.has(year)) {
       byYear.set(year, []);
@@ -260,5 +274,7 @@ export async function getArticlesByYear(): Promise<Map<string, Article[]>> {
   });
 
   // 按年份倒序排列
-  return new Map([...byYear.entries()].sort((a, b) => b[0].localeCompare(a[0])));
+  return new Map(
+    Array.from(byYear.entries()).sort((a, b) => b[0].localeCompare(a[0]))
+  );
 }

@@ -6,7 +6,7 @@ import { ReadingProgress } from "@/components/ReadingProgress";
 import { ShareButtons } from "@/components/ShareButtons";
 import { Comments } from "@/components/Comments";
 import { useEffect, useState } from "react";
-import { useParams } from "wouter";
+import { useParams, Link } from "wouter";
 import { getArticleContent, getAdjacentArticles, type Article } from "@shared/articles";
 
 export default function ArticlePage() {
@@ -159,10 +159,10 @@ export default function ArticlePage() {
         </div>
 
         {/* Table of Contents (Desktop) */}
-        <TableOfContents />
+        <TableOfContents content={article.content} />
 
         {/* Table of Contents (Mobile) */}
-        <MobileTableOfContents />
+        <MobileTableOfContents content={article.content} />
 
         {/* Back to Top Button */}
         <BackToTop />
@@ -185,7 +185,7 @@ function ArticleNavigation({
     <nav className="mt-12 pt-8 border-t border-border/50">
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {prev ? (
-          <a
+          <Link
             href={`/article/${prev.slug}`}
             className="group flex flex-col gap-2 p-4 rounded-lg border border-border/50 hover:border-primary/50 hover:bg-secondary/30 transition-all"
           >
@@ -198,13 +198,13 @@ function ArticleNavigation({
             <span className="font-serif font-medium group-hover:text-primary transition-colors line-clamp-2">
               {prev.title}
             </span>
-          </a>
+          </Link>
         ) : (
           <div />
         )}
 
         {next ? (
-          <a
+          <Link
             href={`/article/${next.slug}`}
             className="group flex flex-col gap-2 p-4 rounded-lg border border-border/50 hover:border-primary/50 hover:bg-secondary/30 transition-all text-right"
           >
@@ -217,7 +217,7 @@ function ArticleNavigation({
             <span className="font-serif font-medium group-hover:text-primary transition-colors line-clamp-2">
               {next.title}
             </span>
-          </a>
+          </Link>
         ) : (
           <div />
         )}

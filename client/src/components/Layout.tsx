@@ -80,6 +80,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
             <Button
               variant="ghost"
               size="icon"
+              data-testid="theme-toggle"
               onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
               className="rounded-full hover:bg-primary/10 hover:text-primary"
             >
@@ -92,6 +93,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
              <Button
               variant="ghost"
               size="icon"
+              data-testid="theme-toggle"
               onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
               className="rounded-full hover:bg-primary/10 hover:text-primary"
             >
@@ -100,6 +102,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
             <Button
               variant="ghost"
               size="icon"
+              data-testid="mobile-menu-toggle"
               onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
               className="text-foreground"
             >

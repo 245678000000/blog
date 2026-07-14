@@ -1,19 +1,19 @@
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import rehypeRaw from "rehype-raw";
-import { lazy, Suspense } from "react";
+import { lazy, Suspense, useState, useEffect } from "react";
 
 // 懒加载代码高亮组件，减少首屏体积
 const SyntaxHighlighter = lazy(() =>
-  import("react-syntax-highlighter/dist/esm/prism-async-light").then((mod) => ({
+  import("react-syntax-highlighter/dist/esm/prism-async-light").then(mod => ({
     default: mod.default,
   }))
-);
+) as any;
 
 // 懒加载主题
 const loadTheme = () =>
   import("react-syntax-highlighter/dist/esm/styles/prism").then(
-    (mod) => mod.oneDark
+    mod => mod.oneDark
   );
 
 // 代码高亮组件
@@ -24,7 +24,10 @@ function CodeHighlighter({
   language: string;
   children: string;
 }) {
-  const [theme, setTheme] = useState<Record<string, React.CSSProperties> | null>(null);
+  const [theme, setTheme] = useState<Record<
+    string,
+    React.CSSProperties
+  > | null>(null);
 
   useEffect(() => {
     loadTheme().then(setTheme);
@@ -58,8 +61,6 @@ function CodeHighlighter({
   );
 }
 
-import { useState, useEffect } from "react";
-
 interface MarkdownProps {
   content: string;
   className?: string;
@@ -72,13 +73,15 @@ export function Markdown({ content, className = "" }: MarkdownProps) {
       remarkPlugins={[remarkGfm]}
       rehypePlugins={[rehypeRaw]}
       components={{
+        script: () => null,
         // 代码块高亮 (懒加载)
-        code({ inline, className, children, ...props }) {
+        code({ className, children, ...props }) {
           const match = /language-(\w+)/.exec(className || "");
           const language = match?.[1] || "";
           const codeContent = String(children).replace(/\n$/, "");
+          const isInline = !className || !className.includes("language-");
 
-          return !inline && language ? (
+          return !isInline && language ? (
             <CodeHighlighter language={language}>{codeContent}</CodeHighlighter>
           ) : (
             <code
@@ -170,7 +173,9 @@ export function Markdown({ content, className = "" }: MarkdownProps) {
           </th>
         ),
         td: ({ children }) => (
-          <td className="px-4 py-2 text-sm text-muted-foreground">{children}</td>
+          <td className="px-4 py-2 text-sm text-muted-foreground">
+            {children}
+          </td>
         ),
         // 图片 (优化加载)
         img: ({ src, alt }) => (

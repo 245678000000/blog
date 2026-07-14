@@ -9,31 +9,11 @@ interface TocItem {
 }
 
 // 共享的 hook 用于获取标题
-function useHeadings() {
+function useHeadings(content: string) {
   const [headings, setHeadings] = useState<TocItem[]>([]);
   const [activeId, setActiveId] = useState<string>("");
 
   useEffect(() => {
-    // 从页面中提取所有标题
-    const elements = Array.from(
-      document.querySelectorAll(".markdown-content h1, .markdown-content h2, .markdown-content h3")
-    );
-
-    const items: TocItem[] = elements.map((elem) => ({
-      id: elem.id || `heading-${Math.random().toString(36).substr(2, 9)}`,
-      text: elem.textContent || "",
-      level: parseInt(elem.tagName.substring(1)),
-    }));
-
-    // 为没有 ID 的标题添加 ID
-    elements.forEach((elem, index) => {
-      if (!elem.id) {
-        elem.id = items[index].id;
-      }
-    });
-
-    setHeadings(items);
-
     // 滚动监听，高亮当前章节
     const observer = new IntersectionObserver(
       (entries) => {
@@ -46,10 +26,50 @@ function useHeadings() {
       { rootMargin: "-100px 0px -80% 0px" }
     );
 
-    elements.forEach((elem) => observer.observe(elem));
+    const updateHeadings = () => {
+      // 从页面中提取所有标题
+      const elements = Array.from(
+        document.querySelectorAll(".markdown-content h1, .markdown-content h2, .markdown-content h3")
+      );
 
-    return () => observer.disconnect();
-  }, []);
+      const items: TocItem[] = elements.map((elem) => ({
+        id: elem.id || `heading-${Math.random().toString(36).substr(2, 9)}`,
+        text: elem.textContent || "",
+        level: parseInt(elem.tagName.substring(1)),
+      }));
+
+      // 为没有 ID 的标题添加 ID
+      elements.forEach((elem, index) => {
+        if (!elem.id) {
+          elem.id = items[index].id;
+        }
+      });
+
+      setHeadings(items);
+
+      // 重新绑定滚动高亮监听
+      observer.disconnect();
+      elements.forEach((elem) => observer.observe(elem));
+    };
+
+    // 初次提取
+    updateHeadings();
+
+    // 监听 DOM 树的变化（防范异步加载/分批渲染）
+    const mutationObserver = new MutationObserver(() => {
+      updateHeadings();
+    });
+
+    mutationObserver.observe(document.body, {
+      childList: true,
+      subtree: true,
+    });
+
+    return () => {
+      observer.disconnect();
+      mutationObserver.disconnect();
+    };
+  }, [content]);
 
   return { headings, activeId };
 }
@@ -70,8 +90,8 @@ function scrollToHeading(id: string) {
 }
 
 // 桌面端目录 (侧边栏)
-export function TableOfContents() {
-  const { headings, activeId } = useHeadings();
+export function TableOfContents({ content }: { content: string }) {
+  const { headings, activeId } = useHeadings(content);
 
   if (headings.length === 0) {
     return null;
@@ -106,8 +126,8 @@ export function TableOfContents() {
 }
 
 // 移动端目录 (可折叠抽屉)
-export function MobileTableOfContents() {
-  const { headings, activeId } = useHeadings();
+export function MobileTableOfContents({ content }: { content: string }) {
+  const { headings, activeId } = useHeadings(content);
   const [isOpen, setIsOpen] = useState(false);
 
   if (headings.length === 0) {
