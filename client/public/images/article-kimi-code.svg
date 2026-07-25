@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="1200" height="630" viewBox="0 0 1200 630" xmlns="http://www.w3.org/2000/svg">
+  <rect width="1200" height="630" fill="#1a1a2e"/>
+  <!-- 终端窗口 -->
+  <rect x="80" y="180" width="650" height="360" rx="12" fill="#16213e" stroke="#0f3460" stroke-width="2"/>
+  <circle cx="110" cy="205" r="6" fill="#e94560"/>
+  <circle cx="132" cy="205" r="6" fill="#f5a623"/>
+  <circle cx="154" cy="205" r="6" fill="#4ecdc4"/>
+  <text x="110" y="250" font-family="monospace" font-size="15" fill="#4ecdc4">moonshot@KimiCode</text>
+  <text x="330" y="250" font-family="monospace" font-size="15" fill="#e0e0e0"> /goal 实现视频动画</text>
+  <text x="110" y="285" font-family="monospace" font-size="14" fill="#8892b0">● 分析视频帧... 提取动画轨迹</text>
+  <text x="110" y="315" font-family="monospace" font-size="14" fill="#8892b0">● 生成 CSS keyframes + JS 控制器</text>
+  <text x="110" y="345" font-family="monospace" font-size="14" fill="#8892b0">● 启动 Swarm: 3 个子代理并行</text>
+  <text x="110" y="375" font-family="monospace" font-size="14" fill="#64ffda">✓ 完成，测试通过 (47s)</text>
+  <text x="110" y="420" font-family="monospace" font-size="15" fill="#4ecdc4">moonshot@KimiCode</text>
+  <text x="330" y="420" font-family="monospace" font-size="15" fill="#e0e0e0"> ▊</text>
+  <!-- 右侧功能标签 -->
+  <rect x="800" y="200" width="320" height="50" rx="8" fill="#0f3460"/>
+  <text x="830" y="232" font-family="monospace" font-size="16" fill="#64ffda">video2code</text>
+  <rect x="800" y="270" width="320" height="50" rx="8" fill="#0f3460"/>
+  <text x="830" y="302" font-family="monospace" font-size="16" fill="#f5a623">Goal Mode</text>
+  <rect x="800" y="340" width="320" height="50" rx="8" fill="#0f3460"/>
+  <text x="830" y="372" font-family="monospace" font-size="16" fill="#e94560">Swarm 集群</text>
+  <rect x="800" y="410" width="320" height="50" rx="8" fill="#0f3460"/>
+  <text x="830" y="442" font-family="monospace" font-size="16" fill="#a78bfa">ACP 协议</text>
+  <!-- 标题 -->
+  <rect x="80" y="70" width="60" height="4" fill="#64ffda"/>
+  <text x="80" y="120" font-family="sans-serif" font-size="46" font-weight="bold" fill="#e0e0e0">Kimi Code 进阶玩法</text>
+  <text x="80" y="158" font-family="monospace" font-size="17" fill="#8892b0">Claude Code 用户的国产替代深度体验</text>
+  <!-- 底部 -->
+  <text x="80" y="590" font-family="sans-serif" font-size="18" fill="#8892b0">邢鹏 · K2.7 Code · 99元/月</text>
+  <rect x="0" y="620" width="1200" height="10" fill="#64ffda" opacity="0.4"/>
+</svg>

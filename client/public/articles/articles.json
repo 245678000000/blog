@@ -33,6 +33,23 @@
     ]
   },
   {
+    "slug": "kimi-code-advanced-guide",
+    "title": "Kimi Code 进阶玩法：视频理解、Goal Mode、Swarm 集群与 ACP 协议全体验",
+    "date": "2026-07-26",
+    "category": "指南",
+    "readTime": "10 分钟",
+    "description": "作为 Claude Code 重度用户，我花了一周深度体验 Kimi Code 的进阶功能：video2code、Goal Mode 自主规划、Swarm 并行集群、ACP 协议接入 IDE，以及能力迁移。这是国产 AI 编程工具的真实水平。",
+    "image": "/images/article-kimi-code.svg",
+    "published": true,
+    "tags": [
+      "Kimi Code",
+      "AI",
+      "编程工具",
+      "CLI",
+      "Agent"
+    ]
+  },
+  {
     "slug": "rag-feishu-wiki-tutorial",
     "title": "RAG 全流程实现 + 飞书 WIKI 文档接入完整教程",
     "date": "2026-07-14",
