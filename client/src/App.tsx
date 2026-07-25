@@ -1,35 +1,50 @@
+import { lazy, Suspense } from "react";
 import { Toaster } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
-import NotFound from "@/pages/NotFound";
 import { Route, Switch } from "wouter";
 import ErrorBoundary from "./components/ErrorBoundary";
 import { ThemeProvider } from "./contexts/ThemeContext";
 import { Analytics } from "./components/Analytics";
-import Home from "./pages/Home";
-import Article from "./pages/Article";
-import Archive from "./pages/Archive";
-import About from "./pages/About";
-import Contact from "./pages/Contact";
 import Layout from "./components/Layout";
+
+// 路由级代码分割
+const Home = lazy(() => import("./pages/Home"));
+const Article = lazy(() => import("./pages/Article"));
+const Archive = lazy(() => import("./pages/Archive"));
+const About = lazy(() => import("./pages/About"));
+const Contact = lazy(() => import("./pages/Contact"));
+const NotFound = lazy(() => import("./pages/NotFound"));
+
+function PageSkeleton() {
+  return (
+    <div className="container max-w-3xl py-12 animate-pulse">
+      <div className="space-y-4">
+        <div className="h-4 w-20 rounded bg-muted" />
+        <div className="h-10 w-2/3 rounded-lg bg-muted" />
+        <div className="h-4 w-full rounded bg-muted" />
+        <div className="h-4 w-5/6 rounded bg-muted" />
+        <div className="h-4 w-4/6 rounded bg-muted" />
+      </div>
+    </div>
+  );
+}
 
 function Router() {
   return (
     <Layout>
-      <Switch>
-        <Route path={"/"} component={Home} />
-        <Route path={"/writings"} component={Home} />
-        {/* 独立页面 */}
-        <Route path={"/archive"} component={Archive} />
-        <Route path={"/about"} component={About} />
-        <Route path={"/contact"} component={Contact} />
-        {/* 动态文章路由 - 支持 /article/:slug */}
-        <Route path={"/article/:slug"} component={Article} />
-        {/* 兼容旧路由 */}
-        <Route path={"/advent-of-claude-2025"} component={Article} />
-        <Route path={"/404"} component={NotFound} />
-        {/* Final fallback route */}
-        <Route component={NotFound} />
-      </Switch>
+      <Suspense fallback={<PageSkeleton />}>
+        <Switch>
+          <Route path={"/"} component={Home} />
+          <Route path={"/writings"} component={Home} />
+          <Route path={"/archive"} component={Archive} />
+          <Route path={"/about"} component={About} />
+          <Route path={"/contact"} component={Contact} />
+          <Route path={"/article/:slug"} component={Article} />
+          <Route path={"/advent-of-claude-2025"} component={Article} />
+          <Route path={"/404"} component={NotFound} />
+          <Route component={NotFound} />
+        </Switch>
+      </Suspense>
     </Layout>
   );
 }

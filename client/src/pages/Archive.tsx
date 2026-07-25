@@ -87,8 +87,31 @@ export default function Archive() {
     return (
       <>
         <SEO title="归档" description="所有文章归档" />
-        <div className="container max-w-4xl py-12 flex items-center justify-center min-h-[50vh]">
-          <div className="text-muted-foreground">加载中...</div>
+        <div className="container max-w-4xl py-12 animate-pulse">
+          {/* 标题骨架 */}
+          <div className="flex flex-col gap-4 mb-12">
+            <div className="h-4 w-20 rounded bg-muted" />
+            <div className="h-10 w-48 rounded-lg bg-muted" />
+            <div className="h-5 w-32 rounded bg-muted" />
+          </div>
+          {/* 筛选器骨架 */}
+          <div className="mb-12 space-y-4">
+            <div className="flex gap-2">
+              <div className="h-8 w-16 rounded-full bg-muted" />
+              <div className="h-8 w-20 rounded-full bg-muted" />
+              <div className="h-8 w-14 rounded-full bg-muted" />
+            </div>
+          </div>
+          {/* 列表骨架 */}
+          <div className="space-y-6">
+            {[1, 2, 3, 4].map((i) => (
+              <div key={i} className="flex items-center gap-4 py-3">
+                <div className="h-4 w-16 rounded bg-muted" />
+                <div className="h-5 flex-1 rounded bg-muted" />
+                <div className="h-6 w-14 rounded-full bg-muted" />
+              </div>
+            ))}
+          </div>
         </div>
       </>
     );

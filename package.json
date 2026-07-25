@@ -5,13 +5,14 @@
   "license": "MIT",
   "scripts": {
     "dev": "npm run sync && vite --host",
-    "build": "npm run sync && vite build && node scripts/generate-feeds.js",
+    "build": "npm run sync && vite build && node scripts/generate-feeds.js && node scripts/generate-og.js && node scripts/prerender.js",
     "sync": "node scripts/sync-articles.js",
     "start": "NODE_ENV=production node dist/index.js",
     "preview": "vite preview --host",
     "check": "tsc --noEmit",
     "format": "prettier --write .",
-    "test": "vitest run"
+    "test": "vitest run",
+    "test:e2e": "playwright test"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.2.2",

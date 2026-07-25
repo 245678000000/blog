@@ -278,3 +278,32 @@ export async function getArticlesByYear(): Promise<Map<string, Article[]>> {
     Array.from(byYear.entries()).sort((a, b) => b[0].localeCompare(a[0]))
   );
 }
+
+// 获取相关文章（基于共同标签数量排序）
+export async function getRelatedArticles(
+  currentSlug: string,
+  limit: number = 3
+): Promise<Article[]> {
+  const articles = await getPublishedArticles();
+  const current = articles.find(a => a.slug === currentSlug);
+  if (!current) return [];
+
+  const currentTags = new Set(current.tags || []);
+  if (currentTags.size === 0) {
+    // 没有标签时返回同分类文章
+    return articles
+      .filter(a => a.slug !== currentSlug && a.category === current.category)
+      .slice(0, limit);
+  }
+
+  return articles
+    .filter(a => a.slug !== currentSlug)
+    .map(a => {
+      const commonTags = (a.tags || []).filter(t => currentTags.has(t)).length;
+      return { article: a, score: commonTags };
+    })
+    .filter(item => item.score > 0)
+    .sort((a, b) => b.score - a.score)
+    .slice(0, limit)
+    .map(item => item.article);
+}

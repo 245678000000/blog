@@ -1,7 +1,7 @@
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import rehypeRaw from "rehype-raw";
-import { lazy, Suspense, useState, useEffect } from "react";
+import { lazy, Suspense, useState, useEffect, useCallback } from "react";
 
 // 懒加载代码高亮组件，减少首屏体积
 const SyntaxHighlighter = lazy(() =>
@@ -28,36 +28,112 @@ function CodeHighlighter({
     string,
     React.CSSProperties
   > | null>(null);
+  const [copied, setCopied] = useState(false);
 
   useEffect(() => {
     loadTheme().then(setTheme);
   }, []);
 
-  if (!theme) {
-    return (
-      <pre className="rounded-lg bg-[#282c34] p-4 overflow-x-auto">
-        <code className="text-sm font-mono text-gray-300">{children}</code>
-      </pre>
-    );
-  }
+  const handleCopy = async () => {
+    try {
+      await navigator.clipboard.writeText(children);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch {
+      // ignore
+    }
+  };
+
+  const fallback = (
+    <pre className="rounded-lg rounded-t-none bg-[#282c34] p-4 overflow-x-auto">
+      <code className="text-sm font-mono text-gray-300">{children}</code>
+    </pre>
+  );
 
   return (
-    <Suspense
-      fallback={
-        <pre className="rounded-lg bg-[#282c34] p-4 overflow-x-auto">
-          <code className="text-sm font-mono text-gray-300">{children}</code>
-        </pre>
-      }
-    >
-      <SyntaxHighlighter
-        style={theme}
-        language={language}
-        PreTag="div"
-        className="rounded-lg"
-      >
-        {children}
-      </SyntaxHighlighter>
-    </Suspense>
+    <div className="rounded-lg overflow-hidden my-4 border border-border/30">
+      {/* 工具栏 */}
+      <div className="flex justify-between items-center px-4 py-2 bg-[#21252b] text-xs text-gray-400">
+        <span className="font-mono uppercase tracking-wide">{language}</span>
+        <button
+          onClick={handleCopy}
+          className="flex items-center gap-1 hover:text-gray-200 transition-colors"
+        >
+          {copied ? (
+            <span className="text-green-400">✓ 已复制</span>
+          ) : (
+            <span>复制</span>
+          )}
+        </button>
+      </div>
+      {/* 代码内容 */}
+      {!theme ? (
+        fallback
+      ) : (
+        <Suspense fallback={fallback}>
+          <SyntaxHighlighter
+            style={theme}
+            language={language}
+            PreTag="div"
+            customStyle={{ margin: 0, borderRadius: 0 }}
+          >
+            {children}
+          </SyntaxHighlighter>
+        </Suspense>
+      )}
+    </div>
+  );
+}
+
+// 图片 Lightbox 组件
+function ImageLightbox({ src, alt }: { src?: string; alt?: string }) {
+  const [isOpen, setIsOpen] = useState(false);
+
+  const handleClose = useCallback(() => setIsOpen(false), []);
+
+  useEffect(() => {
+    if (!isOpen) return;
+    const handleKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") handleClose();
+    };
+    document.addEventListener("keydown", handleKey);
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.removeEventListener("keydown", handleKey);
+      document.body.style.overflow = "";
+    };
+  }, [isOpen, handleClose]);
+
+  return (
+    <>
+      <img
+        src={src}
+        alt={alt}
+        className="rounded-lg my-4 max-w-full h-auto cursor-zoom-in transition-opacity hover:opacity-90"
+        loading="lazy"
+        decoding="async"
+        onClick={() => setIsOpen(true)}
+      />
+      {isOpen && (
+        <div
+          className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/80 backdrop-blur-sm p-4 cursor-zoom-out animate-in fade-in duration-200"
+          onClick={handleClose}
+        >
+          <img
+            src={src}
+            alt={alt}
+            className="max-w-full max-h-[90vh] object-contain rounded-lg shadow-2xl"
+          />
+          <button
+            className="absolute top-4 right-4 text-white/80 hover:text-white text-3xl leading-none"
+            onClick={handleClose}
+            aria-label="关闭"
+          >
+            &times;
+          </button>
+        </div>
+      )}
+    </>
   );
 }
 
@@ -177,15 +253,9 @@ export function Markdown({ content, className = "" }: MarkdownProps) {
             {children}
           </td>
         ),
-        // 图片 (优化加载)
+        // 图片 (优化加载 + 点击放大)
         img: ({ src, alt }) => (
-          <img
-            src={src}
-            alt={alt}
-            className="rounded-lg my-4 max-w-full h-auto"
-            loading="lazy"
-            decoding="async"
-          />
+          <ImageLightbox src={src} alt={alt} />
         ),
         // 强调
         strong: ({ children }) => (

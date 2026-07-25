@@ -14,7 +14,7 @@ interface SEOProps {
 const siteName = "邢鹏的博客";
 const defaultDescription = "法学硕士 | AI Native 开发者 | Prompt 工程师。用 Code 和 AI 工具解决真实世界问题，擅长将 Idea 快速转化为 Demo。";
 // 使用 Vite 环境变量 (需要 VITE_ 前缀)
-const siteUrl = import.meta.env.VITE_SITE_URL || "https://yourdomain.com";
+const siteUrl = import.meta.env.VITE_SITE_URL || "https://www.tthhhh.ggff.net";
 const defaultImage = `${siteUrl}/images/hero-bg.jpg`;
 
 export function SEO({

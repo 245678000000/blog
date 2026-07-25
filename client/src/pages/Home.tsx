@@ -6,10 +6,16 @@ import { Link } from "wouter";
 import { getPublishedArticles, type Article } from "@shared/articles";
 import { useEffect, useState } from "react";
 import { SEO } from "@/components/SEO";
+import { useInView } from "@/hooks/useInView";
+import { cn } from "@/lib/utils";
+import { Newsletter } from "@/components/Newsletter";
 
 export default function Home() {
   const [articles, setArticles] = useState<Article[]>([]);
   const [selectedCategory, setSelectedCategory] = useState<string>("全部");
+  const [featuredRef, featuredVisible] = useInView();
+  const [writingRef, writingVisible] = useInView();
+  const [aboutRef, aboutVisible] = useInView();
 
   useEffect(() => {
     getPublishedArticles().then(setArticles);
@@ -43,6 +49,7 @@ export default function Home() {
               src="/images/hero-bg.jpg"
               alt="Background"
               className="w-full h-full object-cover opacity-40"
+              fetchPriority="high"
             />
             <div className="absolute inset-0 bg-gradient-to-b from-background/80 via-background/50 to-background"></div>
           </div>
@@ -54,9 +61,9 @@ export default function Home() {
             </div>
 
             <h1 className="text-5xl md:text-7xl font-serif font-bold leading-tight">
-              用 Code 和 AI<br />
-              <span className="text-primary italic">解决问题</span>，<br />
-              拒绝空谈。
+              <span className="animate-line block" style={{ animationDelay: '0.2s' }}>用 Code 和 AI</span>
+              <span className="animate-line block text-primary italic" style={{ animationDelay: '0.5s' }}>解决问题</span>
+              <span className="animate-line block" style={{ animationDelay: '0.8s' }}>拒绝空谈。</span>
             </h1>
 
             <p className="text-xl md:text-2xl text-muted-foreground max-w-2xl leading-relaxed">
@@ -84,7 +91,10 @@ export default function Home() {
 
         {/* Featured Section */}
         {featuredArticle && (
-          <section className="container">
+          <section
+            ref={featuredRef}
+            className={cn("container transition-all duration-700", featuredVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8")}
+          >
             <div className="flex items-center gap-4 mb-12">
               <span className="text-sm font-mono tracking-widest uppercase text-primary">精选文章</span>
               <div className="h-[1px] flex-1 bg-border"></div>
@@ -130,7 +140,10 @@ export default function Home() {
 
         {/* Writing Section */}
         {displayArticles.length > 0 && (
-          <section className="container">
+          <section
+            ref={writingRef}
+            className={cn("container transition-all duration-700", writingVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8")}
+          >
             <div className="flex flex-col md:flex-row md:items-end justify-between mb-12 gap-6">
               <div>
                 <span className="text-sm font-mono tracking-widest uppercase text-primary block mb-4">写作</span>
@@ -160,7 +173,17 @@ export default function Home() {
               <div className="grid md:grid-cols-3 gap-8">
                 {displayArticles.map((article) => (
                   <Link key={article.slug} href={`/article/${article.slug}`}>
-                    <Card className="bg-card/50 border-border/50 hover:border-primary/50 transition-all hover:-translate-y-1 hover:shadow-lg group h-full cursor-pointer">
+                    <Card className="bg-card/50 border-border/50 hover:border-primary/50 transition-all hover:-translate-y-1 hover:shadow-lg group h-full cursor-pointer overflow-hidden">
+                      {article.image && (
+                        <div className="aspect-video overflow-hidden">
+                          <img
+                            src={article.image}
+                            alt={article.title}
+                            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                            loading="lazy"
+                          />
+                        </div>
+                      )}
                       <CardHeader>
                         <div className="flex items-center gap-2 text-xs text-muted-foreground mb-2">
                           <span className="text-primary font-medium">{article.category}</span>
@@ -190,11 +213,24 @@ export default function Home() {
                 该分类下暂无文章
               </div>
             )}
+
+            {/* 查看更多 */}
+            <div className="flex justify-center mt-12">
+              <Link href="/archive">
+                <Button variant="outline" className="rounded-full px-8 py-6 text-base hover:text-primary hover:border-primary transition-all">
+                  查看更多文章 <ArrowRight className="ml-2 h-4 w-4" />
+                </Button>
+              </Link>
+            </div>
           </section>
         )}
 
         {/* About Me Section */}
-        <section id="about" className="container bg-secondary/30 rounded-3xl p-8 md:p-16 relative overflow-hidden">
+        <section
+          id="about"
+          ref={aboutRef}
+          className={cn("container bg-secondary/30 rounded-3xl p-8 md:p-16 relative overflow-hidden transition-all duration-700", aboutVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8")}
+        >
           <div className="absolute top-0 right-0 w-64 h-64 bg-primary/5 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2"></div>
 
           <div className="grid md:grid-cols-2 gap-12 items-center relative z-10">
@@ -268,6 +304,11 @@ export default function Home() {
               </div>
             </div>
           </div>
+        </section>
+
+        {/* Newsletter */}
+        <section className="container">
+          <Newsletter />
         </section>
       </div>
     </>

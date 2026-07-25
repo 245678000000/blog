@@ -20,7 +20,14 @@ export function ThemeProvider({
 }: ThemeProviderProps) {
   const [theme, setThemeState] = useState<Theme>(() => {
     const stored = localStorage.getItem("theme");
-    return (stored as Theme) || defaultTheme;
+    if (stored === "light" || stored === "dark") {
+      return stored;
+    }
+    // 首次访问时跟随系统偏好
+    if (typeof window !== "undefined" && window.matchMedia("(prefers-color-scheme: light)").matches) {
+      return "light";
+    }
+    return defaultTheme;
   });
 
   useEffect(() => {

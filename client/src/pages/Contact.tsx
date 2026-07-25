@@ -13,6 +13,8 @@ import {
   Send,
   MapPin,
   Clock,
+  Copy,
+  Check,
 } from "lucide-react";
 
 // 社交链接
@@ -48,6 +50,18 @@ export default function Contact() {
     message: "",
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [copied, setCopied] = useState(false);
+
+  const handleCopyEmail = async () => {
+    try {
+      await navigator.clipboard.writeText("xingpeng278@aliyun.com");
+      setCopied(true);
+      toast.success("邮箱地址已复制");
+      setTimeout(() => setCopied(false), 2000);
+    } catch {
+      toast.error("复制失败，请手动复制");
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -62,7 +76,7 @@ export default function Contact() {
     // 模拟提交（实际项目中可以对接邮件服务）
     await new Promise((resolve) => setTimeout(resolve, 10));
 
-    // 使用 mailto 链接作为备用方案
+    // 使用 mailto 链接打开邮件客户端
     const mailtoLink = `mailto:xingpeng278@aliyun.com?subject=${encodeURIComponent(
       formData.subject || "来自网站的消息"
     )}&body=${encodeURIComponent(
@@ -70,9 +84,9 @@ export default function Contact() {
     )}`;
 
     // 打开邮件客户端
-    window.open(mailtoLink, "_blank");
+    window.location.href = mailtoLink;
 
-    toast.success("正在打开邮件客户端...");
+    toast.success("正在打开邮件客户端，如未弹出请手动发送邮件至 xingpeng278@aliyun.com");
     setIsSubmitting(false);
 
     // 清空表单
@@ -171,6 +185,23 @@ export default function Contact() {
                       <Send className="w-4 h-4 mr-2" />
                       发送消息
                     </>
+                  )}
+                </Button>
+
+                <p className="text-xs text-center text-muted-foreground">
+                  提交后将打开你的邮件客户端。也可以直接复制邮箱地址：
+                </p>
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  className="w-full rounded-full text-muted-foreground hover:text-primary"
+                  onClick={handleCopyEmail}
+                >
+                  {copied ? (
+                    <><Check className="w-4 h-4 mr-2 text-green-500" /> 已复制</>
+                  ) : (
+                    <><Copy className="w-4 h-4 mr-2" /> xingpeng278@aliyun.com</>
                   )}
                 </Button>
               </form>

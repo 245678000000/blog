@@ -8,7 +8,7 @@ import { fileURLToPath } from 'url';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-const siteUrl = process.env.VITE_SITE_URL || 'https://blog-seven-gules.vercel.app';
+const siteUrl = process.env.VITE_SITE_URL || 'https://www.tthhhh.ggff.net';
 
 // 读取文章数据
 const articlesPath = path.join(__dirname, '../client/public/articles/articles.json');

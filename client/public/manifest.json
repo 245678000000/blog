@@ -1,0 +1,17 @@
+{
+  "name": "邢鹏的博客",
+  "short_name": "XingPeng",
+  "description": "法学硕士 | AI Native 开发者 | Prompt 工程师",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#1a2420",
+  "theme_color": "#1a2420",
+  "icons": [
+    {
+      "src": "/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    }
+  ]
+}

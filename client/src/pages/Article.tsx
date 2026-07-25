@@ -5,9 +5,10 @@ import { TableOfContents, MobileTableOfContents, BackToTop } from "@/components/
 import { ReadingProgress } from "@/components/ReadingProgress";
 import { ShareButtons } from "@/components/ShareButtons";
 import { Comments } from "@/components/Comments";
+import { Newsletter } from "@/components/Newsletter";
 import { useEffect, useState } from "react";
 import { useParams, Link } from "wouter";
-import { getArticleContent, getAdjacentArticles, type Article } from "@shared/articles";
+import { getArticleContent, getAdjacentArticles, getRelatedArticles, type Article } from "@shared/articles";
 
 export default function ArticlePage() {
   const params = useParams();
@@ -17,6 +18,7 @@ export default function ArticlePage() {
     prev: Article | null;
     next: Article | null;
   }>({ prev: null, next: null });
+  const [relatedArticles, setRelatedArticles] = useState<Article[]>([]);
   const [loading, setLoading] = useState(true);
   const [notFound, setNotFound] = useState(false);
 
@@ -44,6 +46,10 @@ export default function ArticlePage() {
       const adjacent = await getAdjacentArticles(slug);
       setAdjacentArticles(adjacent);
 
+      // 获取相关文章
+      const related = await getRelatedArticles(slug, 3);
+      setRelatedArticles(related);
+
       setLoading(false);
     }
 
@@ -54,8 +60,28 @@ export default function ArticlePage() {
     return (
       <>
         <SEO title="加载中..." />
-        <div className="container max-w-3xl py-12 flex items-center justify-center min-h-[50vh]">
-          <div className="text-muted-foreground">加载中...</div>
+        <div className="container max-w-3xl py-12 animate-pulse">
+          <div className="flex flex-col gap-6">
+            {/* 元信息骨架 */}
+            <div className="flex items-center gap-4">
+              <div className="h-6 w-16 rounded-full bg-muted" />
+              <div className="h-4 w-24 rounded bg-muted" />
+              <div className="h-4 w-20 rounded bg-muted" />
+            </div>
+            {/* 标题骨架 */}
+            <div className="h-12 w-3/4 rounded-lg bg-muted" />
+            <div className="h-6 w-1/2 rounded bg-muted" />
+            {/* 封面图骨架 */}
+            <div className="aspect-video w-full rounded-2xl bg-muted" />
+            {/* 内容骨架 */}
+            <div className="space-y-3 pt-4">
+              <div className="h-4 w-full rounded bg-muted" />
+              <div className="h-4 w-full rounded bg-muted" />
+              <div className="h-4 w-5/6 rounded bg-muted" />
+              <div className="h-4 w-full rounded bg-muted" />
+              <div className="h-4 w-2/3 rounded bg-muted" />
+            </div>
+          </div>
         </div>
       </>
     );
@@ -151,11 +177,46 @@ export default function ArticlePage() {
             />
           </div>
 
+          {/* Related Articles */}
+          {relatedArticles.length > 0 && (
+            <div className="mt-8 pt-8 border-t border-border/50">
+              <h3 className="text-lg font-serif font-bold mb-4">相关文章</h3>
+              <div className="grid gap-3">
+                {relatedArticles.map((related) => (
+                  <Link
+                    key={related.slug}
+                    href={`/article/${related.slug}`}
+                    className="group flex items-center gap-3 p-3 rounded-lg hover:bg-secondary/50 transition-colors"
+                  >
+                    <div className="flex-1 min-w-0">
+                      <p className="font-medium group-hover:text-primary transition-colors line-clamp-1">
+                        {related.title}
+                      </p>
+                      <p className="text-xs text-muted-foreground">{related.date} · {related.category}</p>
+                    </div>
+                  </Link>
+                ))}
+              </div>
+            </div>
+          )}
+
           {/* Comments */}
           <Comments />
 
           {/* Article Navigation (Prev/Next) */}
           <ArticleNavigation prev={adjacentArticles.prev} next={adjacentArticles.next} />
+
+          {/* RSS 提醒 */}
+          <div className="mt-8 text-center text-sm text-muted-foreground">
+            喜欢这篇文章？{" "}
+            <a href="/rss.xml" className="text-primary hover:underline">订阅 RSS</a>
+            {" "}获取最新更新。
+          </div>
+
+          {/* Newsletter */}
+          <div className="mt-8">
+            <Newsletter />
+          </div>
         </div>
 
         {/* Table of Contents (Desktop) */}
