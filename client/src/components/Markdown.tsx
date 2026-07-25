@@ -137,6 +137,16 @@ function ImageLightbox({ src, alt }: { src?: string; alt?: string }) {
   );
 }
 
+// 从标题文本生成 slug ID（兼容中文）
+function generateHeadingId(text: string): string {
+  return text
+    .toLowerCase()
+    .replace(/[^\w\u4e00-\u9fa5\s-]/g, '') // 保留中文、英文、数字、空格、连字符
+    .replace(/\s+/g, '-')                    // 空格转连字符
+    .replace(/-+/g, '-')                     // 合并多个连字符
+    .replace(/^-|-$/g, '');                   // 去除首尾连字符
+}
+
 interface MarkdownProps {
   content: string;
   className?: string;
@@ -168,27 +178,39 @@ export function Markdown({ content, className = "" }: MarkdownProps) {
             </code>
           );
         },
-        // 标题
-        h1: ({ children }) => (
-          <h1 className="text-3xl md:text-4xl font-serif font-bold mt-8 mb-4 text-foreground">
-            {children}
-          </h1>
-        ),
-        h2: ({ children }) => (
-          <h2 className="text-2xl md:text-3xl font-serif font-bold mt-8 mb-4 text-foreground">
-            {children}
-          </h2>
-        ),
-        h3: ({ children }) => (
-          <h3 className="text-xl md:text-2xl font-serif font-semibold mt-6 mb-3 text-foreground">
-            {children}
-          </h3>
-        ),
-        h4: ({ children }) => (
-          <h4 className="text-lg md:text-xl font-serif font-semibold mt-4 mb-2 text-foreground">
-            {children}
-          </h4>
-        ),
+        // 标题（自动生成 id 供目录跳转）
+        h1: ({ children }) => {
+          const text = String(children);
+          return (
+            <h1 id={generateHeadingId(text)} className="text-3xl md:text-4xl font-serif font-bold mt-8 mb-4 text-foreground scroll-mt-24">
+              {children}
+            </h1>
+          );
+        },
+        h2: ({ children }) => {
+          const text = String(children);
+          return (
+            <h2 id={generateHeadingId(text)} className="text-2xl md:text-3xl font-serif font-bold mt-8 mb-4 text-foreground scroll-mt-24">
+              {children}
+            </h2>
+          );
+        },
+        h3: ({ children }) => {
+          const text = String(children);
+          return (
+            <h3 id={generateHeadingId(text)} className="text-xl md:text-2xl font-serif font-semibold mt-6 mb-3 text-foreground scroll-mt-24">
+              {children}
+            </h3>
+          );
+        },
+        h4: ({ children }) => {
+          const text = String(children);
+          return (
+            <h4 id={generateHeadingId(text)} className="text-lg md:text-xl font-serif font-semibold mt-4 mb-2 text-foreground scroll-mt-24">
+              {children}
+            </h4>
+          );
+        },
         // 段落
         p: ({ children }) => (
           <p className="text-base md:text-lg leading-relaxed text-muted-foreground mb-4">
