@@ -50,6 +50,22 @@
     ]
   },
   {
+    "slug": "vscode-beginner-guide",
+    "title": "为什么全球开发者都离不开 VS Code？7 大核心功能一次搞懂",
+    "date": "2026-07-26",
+    "category": "指南",
+    "readTime": "12 分钟",
+    "description": "从命令面板到调试器，从插件生态到 Git 集成——以我两年 VS Code 使用经验，带新手一次搞懂 7 大核心功能，附我的个人配置和快捷键清单。",
+    "image": "/images/article-vscode-guide.svg",
+    "published": true,
+    "tags": [
+      "VS Code",
+      "编程工具",
+      "效率",
+      "入门"
+    ]
+  },
+  {
     "slug": "rag-feishu-wiki-tutorial",
     "title": "RAG 全流程实现 + 飞书 WIKI 文档接入完整教程",
     "date": "2026-07-14",

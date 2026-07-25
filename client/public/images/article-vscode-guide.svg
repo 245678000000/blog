@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="1200" height="630" viewBox="0 0 1200 630" xmlns="http://www.w3.org/2000/svg">
+  <rect width="1200" height="630" fill="#1e1e1e"/>
+  <!-- VS Code 风格侧边栏 -->
+  <rect x="0" y="0" width="48" height="630" fill="#333333"/>
+  <rect x="12" y="80" width="24" height="24" rx="4" fill="#007acc" opacity="0.8"/>
+  <rect x="12" y="130" width="24" height="24" rx="4" fill="#888" opacity="0.4"/>
+  <rect x="12" y="180" width="24" height="24" rx="4" fill="#888" opacity="0.4"/>
+  <rect x="12" y="230" width="24" height="24" rx="4" fill="#888" opacity="0.4"/>
+  <rect x="12" y="280" width="24" height="24" rx="4" fill="#888" opacity="0.4"/>
+  <!-- 编辑器区域装饰代码 -->
+  <text x="90" y="60" font-family="monospace" font-size="13" fill="#569cd6">const</text>
+  <text x="140" y="60" font-family="monospace" font-size="13" fill="#9cdcfe"> features</text>
+  <text x="240" y="60" font-family="monospace" font-size="13" fill="#d4d4d4"> = [</text>
+  <text x="110" y="85" font-family="monospace" font-size="13" fill="#ce9178">"命令面板"</text>
+  <text x="220" y="85" font-family="monospace" font-size="13" fill="#d4d4d4">,</text>
+  <text x="110" y="110" font-family="monospace" font-size="13" fill="#ce9178">"扩展生态"</text>
+  <text x="220" y="110" font-family="monospace" font-size="13" fill="#d4d4d4">,</text>
+  <text x="110" y="135" font-family="monospace" font-size="13" fill="#ce9178">"IntelliSense"</text>
+  <text x="250" y="135" font-family="monospace" font-size="13" fill="#d4d4d4">,</text>
+  <text x="110" y="160" font-family="monospace" font-size="13" fill="#ce9178">"集成终端"</text>
+  <text x="220" y="160" font-family="monospace" font-size="13" fill="#d4d4d4">,</text>
+  <text x="110" y="185" font-family="monospace" font-size="13" fill="#ce9178">"Git 集成"</text>
+  <text x="220" y="185" font-family="monospace" font-size="13" fill="#d4d4d4">,</text>
+  <text x="110" y="210" font-family="monospace" font-size="13" fill="#ce9178">"调试器"</text>
+  <text x="200" y="210" font-family="monospace" font-size="13" fill="#d4d4d4">,</text>
+  <text x="110" y="235" font-family="monospace" font-size="13" fill="#ce9178">"多光标编辑"</text>
+  <text x="90" y="260" font-family="monospace" font-size="13" fill="#d4d4d4">];</text>
+  <!-- 主标题 -->
+  <rect x="90" y="320" width="60" height="4" fill="#007acc"/>
+  <text x="90" y="380" font-family="sans-serif" font-size="46" font-weight="bold" fill="#e0e0e0">VS Code 7 大核心功能</text>
+  <text x="90" y="425" font-family="sans-serif" font-size="24" fill="#888">新手必学的完整入门指南</text>
+  <!-- 右侧 VS Code Logo 简化 -->
+  <rect x="850" y="250" width="260" height="200" rx="20" fill="#007acc" opacity="0.15"/>
+  <text x="980" y="365" font-family="sans-serif" font-size="72" font-weight="bold" fill="#007acc" text-anchor="middle">{}</text>
+  <!-- 底部 -->
+  <text x="90" y="560" font-family="sans-serif" font-size="18" fill="#888">邢鹏 · 免费开源 · 5万+扩展 · 全平台</text>
+  <text x="90" y="590" font-family="monospace" font-size="14" fill="#555">Ctrl+Shift+P → 一切的入口</text>
+  <rect x="0" y="620" width="1200" height="10" fill="#007acc" opacity="0.5"/>
+</svg>
