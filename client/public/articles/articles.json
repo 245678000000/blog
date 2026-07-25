@@ -50,6 +50,23 @@
     ]
   },
   {
+    "slug": "hermes-agent-guide",
+    "title": "Hermes Agent 保姆级教学：越用越聪明的本地 AI 私人助理，用过就回不去了",
+    "date": "2026-07-26",
+    "category": "指南",
+    "readTime": "14 分钟",
+    "description": "Hermes Agent 是 Nous Research 推出的开源自进化 AI Agent：本地部署、跨会话记忆、自动学习技能、接入 15+ 聊天平台。本文记录我从安装到日常使用的完整体验，以及它为什么让 OpenClaw 用户大规模迁移。",
+    "image": "/images/article-hermes-agent.svg",
+    "published": true,
+    "tags": [
+      "Hermes Agent",
+      "AI",
+      "开源",
+      "本地部署",
+      "Agent"
+    ]
+  },
+  {
     "slug": "kimi-code-advanced-guide",
     "title": "Kimi Code 进阶玩法：视频理解、Goal Mode、Swarm 集群与 ACP 协议全体验",
     "date": "2026-07-26",
