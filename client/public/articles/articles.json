@@ -8,7 +8,12 @@
     "description": "用 TypeScript 从零实现一个完整的 AI Agent——不是调 API 的玩具，而是真正理解 Agent Loop、工具协议、EventStream 和 Context Compaction 的底层原理。",
     "image": "/images/article-1.jpg",
     "published": true,
-    "tags": ["Agent", "TypeScript", "AI", "编程工具"]
+    "tags": [
+      "Agent",
+      "TypeScript",
+      "AI",
+      "编程工具"
+    ]
   },
   {
     "slug": "rag-feishu-wiki-tutorial",
