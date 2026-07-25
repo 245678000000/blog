@@ -4,7 +4,7 @@ date: "2026-07-26"
 category: "指南"
 readTime: "12 分钟"
 description: "用 TypeScript 从零实现一个完整的 AI Agent——不是调 API 的玩具，而是真正理解 Agent Loop、工具协议、EventStream 和 Context Compaction 的底层原理。"
-image: "/images/article-1.jpg"
+image: "/images/article-build-pi.svg"
 published: true
 tags: ["Agent", "TypeScript", "AI", "编程工具"]
 ---
