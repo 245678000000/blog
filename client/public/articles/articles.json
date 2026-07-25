@@ -33,6 +33,23 @@
     ]
   },
   {
+    "slug": "codex-complete-guide",
+    "title": "Codex 保姆级全攻略：从安装到精通，一期搞懂 OpenAI 的编程 Agent",
+    "date": "2026-07-26",
+    "category": "指南",
+    "readTime": "15 分钟",
+    "description": "OpenAI Codex 不是代码补全工具，而是一个完整的编程 Agent。本文从安装配置到三种执行模式，从实战场景到 AGENTS.md，从审批策略到第三方模型接入，一期全部讲透。",
+    "image": "/images/article-codex-guide.svg",
+    "published": true,
+    "tags": [
+      "Codex",
+      "OpenAI",
+      "AI",
+      "编程工具",
+      "Agent"
+    ]
+  },
+  {
     "slug": "kimi-code-advanced-guide",
     "title": "Kimi Code 进阶玩法：视频理解、Goal Mode、Swarm 集群与 ACP 协议全体验",
     "date": "2026-07-26",
