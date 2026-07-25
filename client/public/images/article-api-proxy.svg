@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="1200" height="630" viewBox="0 0 1200 630" xmlns="http://www.w3.org/2000/svg">
+  <rect width="1200" height="630" fill="#0f1419"/>
+  <!-- 网络拓扑装饰 -->
+  <circle cx="200" cy="315" r="40" fill="none" stroke="#38bdf8" stroke-width="2"/>
+  <text x="200" y="320" font-family="monospace" font-size="14" fill="#38bdf8" text-anchor="middle">User</text>
+  <line x1="240" y1="315" x2="380" y2="315" stroke="#334155" stroke-width="2" stroke-dasharray="6,4"/>
+  <circle cx="430" cy="315" r="40" fill="none" stroke="#a78bfa" stroke-width="2"/>
+  <text x="430" y="310" font-family="monospace" font-size="11" fill="#a78bfa" text-anchor="middle">Cloud</text>
+  <text x="430" y="326" font-family="monospace" font-size="11" fill="#a78bfa" text-anchor="middle">flare</text>
+  <line x1="470" y1="315" x2="610" y2="315" stroke="#334155" stroke-width="2" stroke-dasharray="6,4"/>
+  <circle cx="660" cy="315" r="40" fill="none" stroke="#34d399" stroke-width="2"/>
+  <text x="660" y="320" font-family="monospace" font-size="12" fill="#34d399" text-anchor="middle">Nginx</text>
+  <line x1="700" y1="315" x2="840" y2="315" stroke="#334155" stroke-width="2" stroke-dasharray="6,4"/>
+  <circle cx="890" cy="315" r="40" fill="none" stroke="#fbbf24" stroke-width="2"/>
+  <text x="890" y="310" font-family="monospace" font-size="11" fill="#fbbf24" text-anchor="middle">New</text>
+  <text x="890" y="326" font-family="monospace" font-size="11" fill="#fbbf24" text-anchor="middle">API</text>
+  <line x1="930" y1="315" x2="1050" y2="315" stroke="#334155" stroke-width="2" stroke-dasharray="6,4"/>
+  <circle cx="1090" cy="315" r="35" fill="none" stroke="#f87171" stroke-width="2"/>
+  <text x="1090" y="320" font-family="monospace" font-size="11" fill="#f87171" text-anchor="middle">CPA</text>
+  <!-- 标题 -->
+  <rect x="80" y="100" width="60" height="4" fill="#38bdf8"/>
+  <text x="80" y="155" font-family="sans-serif" font-size="48" font-weight="bold" fill="#f1f5f9">搭建 API 中转站</text>
+  <text x="80" y="200" font-family="monospace" font-size="18" fill="#64748b">VPS + CPA + New API + Docker + Nginx + SSL</text>
+  <!-- 底部 -->
+  <text x="80" y="530" font-family="sans-serif" font-size="18" fill="#64748b">邢鹏 · Docker Compose 一键编排 · HTTPS 对外服务</text>
+  <text x="80" y="560" font-family="monospace" font-size="14" fill="#475569">$ docker compose up -d</text>
+  <rect x="0" y="620" width="1200" height="10" fill="#38bdf8" opacity="0.4"/>
+</svg>

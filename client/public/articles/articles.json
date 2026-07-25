@@ -1,12 +1,29 @@
 [
   {
+    "slug": "api-proxy-station-tutorial",
+    "title": "手把手搭建 API 中转站：VPS + CPA + New API + Docker + Nginx + SSL 全流程",
+    "date": "2026-07-26",
+    "category": "指南",
+    "readTime": "15 分钟",
+    "description": "从零搭建一个完整的 AI API 中转站：Docker 编排 CPA + New API + PostgreSQL + Redis，Nginx 反向代理 + Cloudflare SSL，实现多模型统一管理、token 监控和 HTTPS 对外服务。",
+    "image": "/images/article-api-proxy.svg",
+    "published": true,
+    "tags": [
+      "Docker",
+      "Nginx",
+      "Cloudflare",
+      "API",
+      "VPS"
+    ]
+  },
+  {
     "slug": "build-your-own-pi",
     "title": "动手学 Pi：从一条运行轨迹开始，亲手造一个 AI Agent",
     "date": "2026-07-26",
     "category": "指南",
     "readTime": "12 分钟",
     "description": "用 TypeScript 从零实现一个完整的 AI Agent——不是调 API 的玩具，而是真正理解 Agent Loop、工具协议、EventStream 和 Context Compaction 的底层原理。",
-    "image": "/images/article-1.jpg",
+    "image": "/images/article-build-pi.svg",
     "published": true,
     "tags": [
       "Agent",
