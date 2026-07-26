@@ -99,13 +99,14 @@ describe("F6: 归档页年/月轴线归档列表与标签/分类 URL 参数监�
 
     render(<Archive />);
 
-    // 加载状态应先显示，随后等待数据装载完毕
+    // 等待真实内容出现。注意不能等「加载中...」消失：Archive 的加载态是
+    // 骨架屏，压根不含这段文字，那样的等待会立刻通过，后续断言就会和
+    // 异步加载赛跑（CI 上偶发失败，本地几乎必过）。
     await waitFor(() => {
-      expect(screen.queryByText("加载中...")).not.toBeInTheDocument();
+      expect(screen.getByText("第一篇 2026 的文章")).toBeInTheDocument();
     });
 
     // 应该显示 2 篇 React 相关的文章，2025 年的文章（第 3 篇，设计/Tailwind）应该被过滤
-    expect(screen.getByText("第一篇 2026 的文章")).toBeInTheDocument();
     expect(screen.getByText("第二篇 2026 的文章")).toBeInTheDocument();
     expect(screen.queryByText("第三篇 2025 的文章")).not.toBeInTheDocument();
 
@@ -130,12 +131,10 @@ describe("F6: 归档页年/月轴线归档列表与标签/分类 URL 参数监�
 
     render(<Archive />);
 
+    // 同上：等待真正的空态文案出现，而不是等一段并不存在的「加载中...」消失
     await waitFor(() => {
-      expect(screen.queryByText("加载中...")).not.toBeInTheDocument();
+      expect(screen.getByText("共 0 篇文章 (已筛选)")).toBeInTheDocument();
     });
-
-    // 验证有“没有找到文章”的空状态提示（根据项目实现，通常会提示共 0 篇文章或空提示）
-    expect(screen.getByText("共 0 篇文章 (已筛选)")).toBeInTheDocument();
   });
 
   it("Tier 2: 如果文章发布时间含有畸形年份（如空或非法日期格式），应安全分入未知组或优雅跳过", async () => {
