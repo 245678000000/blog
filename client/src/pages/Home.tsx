@@ -329,8 +329,8 @@ export default function Home() {
 
               <div className="space-y-4 text-lg text-muted-foreground leading-relaxed">
                 <p>
-                  上海师范大学法律硕士（国际法方向）在读。把法律方法论拧进 AI
-                  工程：做{" "}
+                  上海师范大学法律硕士（国际法方向）在读，专注于将法律方法论引入
+                  AI 工程。独立构建并上线{" "}
                   <a
                     href="https://legal-skillshub.vercel.app/"
                     target="_blank"
@@ -339,20 +339,21 @@ export default function Home() {
                   >
                     Legal SkillsHub
                   </a>
-                  ，也落地{" "}
-                  <strong className="text-foreground">RAG 知识库</strong>、垂直{" "}
+                  ，并落地{" "}
+                  <strong className="text-foreground">RAG 知识库</strong>
+                  、垂直场景{" "}
                   <strong className="text-foreground">Chatbot</strong> 与{" "}
                   <strong className="text-foreground">Agent Harness</strong>。
                 </p>
                 <p>
-                  擅长 Cursor / Claude 等 AI
-                  原生开发，熟悉检索增强、技能包体系与工作流编排。
-                  法学训练带来的边界意识，让 Agent
-                  不只会生成，还知道何时引用、何时停、何时让人复核。
+                  熟悉检索增强生成、技能包体系与工作流编排，日常以 Claude /
+                  Cursor 等工具进行 AI 原生开发。 法学训练带来的边界意识，使
+                  Agent
+                  不止于生成，更能判断何时引用来源、何时停止、何时交由人工复核。
                 </p>
                 <p>
                   <em className="text-foreground/80">
-                    Idea 能快速变成可演示、可复用、可分发的东西。
+                    让 Idea 快速成为可演示、可复用、可分发的产物。
                   </em>
                 </p>
               </div>

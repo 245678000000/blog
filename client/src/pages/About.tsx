@@ -58,13 +58,7 @@ const skills = [
   },
   {
     category: "领域 & 社区",
-    items: [
-      "法律 × AI 交叉",
-      "企业知识库",
-      "Linux.do 3级",
-      "GitHub 活跃贡献",
-      "CET-6",
-    ],
+    items: ["法律 × AI 交叉", "企业知识库", "合规自动化", "技术写作与开源分享"],
   },
 ];
 
@@ -110,14 +104,6 @@ const timeline = [
     icon: Rocket,
   },
   {
-    year: "2025.09 - 2027.06",
-    title: "法律硕士 (国际法方向)",
-    organization: "上海师范大学",
-    description:
-      "专注 AI 与法律交叉：合规自动化、知识库问答、Agent 在法务场景中的边界与责任。",
-    icon: GraduationCap,
-  },
-  {
     year: "2025.11",
     title: "「大学生 AI 赋能司法」创新挑战赛",
     organization: "项目负责人",
@@ -126,12 +112,28 @@ const timeline = [
     icon: Award,
   },
   {
+    year: "2025.09 - 2027.06",
+    title: "法律硕士 (国际法方向)",
+    organization: "上海师范大学",
+    description:
+      "专注 AI 与法律交叉：合规自动化、知识库问答、Agent 在法务场景中的边界与责任。",
+    icon: GraduationCap,
+  },
+  {
     year: "2025",
     title: "RAG / Chatbot / Harness 工程实践",
     organization: "个人项目 & 技术写作",
     description:
       "落地检索增强生成、企业知识库同步与 Agent 循环（实现 → 验证 → 审查）。在 Linux.do 等社区分享 Java + LangChain4j 全流程与飞书 WIKI 接入经验。",
     icon: Sparkles,
+  },
+  {
+    year: "2023.11 - 2023.12",
+    title: "校辩论队队长",
+    organization: "逻辑思维训练",
+    description:
+      "高强度逻辑拆解训练，构建 Chain-of-Thought 式论证闭环——后来直接迁移到 Agent 设计里。",
+    icon: MessageSquare,
   },
   {
     year: "2023.07 - 2023.10",
@@ -148,14 +150,6 @@ const timeline = [
     description:
       "数据清洗、深度检索，将非结构化法律文本转化为可检索、可分析的结构化数据。",
     icon: Briefcase,
-  },
-  {
-    year: "2023.11 - 2023.12",
-    title: "校辩论队队长",
-    organization: "逻辑思维训练",
-    description:
-      "高强度逻辑拆解训练，构建 Chain-of-Thought 式论证闭环——后来直接迁移到 Agent 设计里。",
-    icon: MessageSquare,
   },
   {
     year: "2021.09 - 2025.06",
@@ -239,23 +233,14 @@ export default function About() {
                   >
                     RAG 实践者
                   </Badge>
-                  <Badge
-                    variant="secondary"
-                    className="bg-primary/20 text-primary"
-                  >
-                    Linux.do 3级
-                  </Badge>
                 </div>
 
                 <div className="space-y-4 text-lg text-muted-foreground leading-relaxed">
                   <p>
-                    你好！我是邢鹏，上海师范大学法律硕士（国际法方向）在读，一名把{" "}
-                    <strong className="text-foreground">法律方法论</strong> 和{" "}
-                    <strong className="text-foreground">AI 工程</strong>{" "}
-                    拧在一起的开发者。
-                  </p>
-                  <p>
-                    我做{" "}
+                    上海师范大学法律硕士（国际法方向）在读，专注于将{" "}
+                    <strong className="text-foreground">法律方法论</strong> 引入{" "}
+                    <strong className="text-foreground">AI 工程</strong>。
+                    独立构建并上线{" "}
                     <a
                       href="https://legal-skillshub.vercel.app/"
                       target="_blank"
@@ -264,21 +249,25 @@ export default function About() {
                     >
                       Legal SkillsHub
                     </a>
-                    ——法律人的 Agent Skills 中心；也会亲手搭{" "}
-                    <strong className="text-foreground">RAG 知识库</strong>
-                    、垂直场景{" "}
-                    <strong className="text-foreground">Chatbot</strong>
-                    ，以及能「实现 → 验证 → 审查」闭环的{" "}
-                    <strong className="text-foreground">Agent Harness</strong>。
+                    ——面向律师、公司法务与合规岗位的 Agent Skills 平台，已编目
+                    42 个技能包与 13 套工作流。
                   </p>
                   <p>
-                    法学训练给了我对边界、例外与可追责性的敏感度——这恰好是靠谱
-                    Agent
-                    最缺的那一层：不只会生成，还知道何时该停、该引用、该让人复核。
+                    在工程侧，基于 Java 与 LangChain4j 完成企业知识库{" "}
+                    <strong className="text-foreground">RAG</strong>{" "}
+                    的完整链路，涵盖文档切分、向量检索、重排序与飞书 WIKI
+                    定时同步，具备增量更新与一致性清理能力；并落地垂直场景{" "}
+                    <strong className="text-foreground">Chatbot</strong> 与{" "}
+                    <strong className="text-foreground">Agent Harness</strong>
+                    （实现 → 验证 → 审查闭环）。
+                  </p>
+                  <p>
+                    法学训练带来的边界意识与可追责要求，是我在 Agent
+                    设计中的主要差异化优势：不仅关注生成质量，更关注何时应当停止、引用来源与交由人工复核。
                   </p>
                   <p>
                     <em>
-                      Idea 能快速变成可演示、可复用、可分发的东西。拒绝空谈。
+                      让 Idea 快速成为可演示、可复用、可分发的产物。拒绝空谈。
                     </em>
                   </p>
                 </div>
