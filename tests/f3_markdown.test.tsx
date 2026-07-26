@@ -247,4 +247,60 @@ const [isPending, startTransition] = useTransition();
       false
     );
   });
+
+  // ==========================================
+  // 标题锚点：唯一性与稳定性
+  // ==========================================
+  it("锚点: 重复标题必须生成互不相同的 ID", () => {
+    const md = [
+      "## 安装步骤",
+      "内容一",
+      "## 安装步骤",
+      "内容二",
+      "## 安装步骤",
+      "内容三",
+    ].join("\n\n");
+
+    const { container } = render(<Markdown content={md} />);
+
+    const ids = Array.from(container.querySelectorAll("h2")).map(h => h.id);
+    expect(ids).toHaveLength(3);
+
+    // 全部非空
+    expect(ids.every(id => id.length > 0)).toBe(true);
+    // 互不重复
+    expect(new Set(ids).size).toBe(3);
+    // 第一个保持干净的基础形态，便于人工书写链接
+    expect(ids[0]).toBe("安装步骤");
+  });
+
+  it("锚点: 纯符号标题不得生成空 ID", () => {
+    const md = ["### !!!", "内容一", "### ???", "内容二"].join("\n\n");
+
+    const { container } = render(<Markdown content={md} />);
+
+    const ids = Array.from(container.querySelectorAll("h3")).map(h => h.id);
+    expect(ids).toHaveLength(2);
+    expect(ids.every(id => id.length > 0)).toBe(true);
+    expect(new Set(ids).size).toBe(2);
+  });
+
+  it("锚点: 同样的输入多次渲染必须得到同样的 ID（可复制、可预渲染）", () => {
+    const md = ["## 安装步骤", "a", "## 配置", "b", "## 安装步骤", "c"].join(
+      "\n\n"
+    );
+
+    const first = render(<Markdown content={md} />);
+    const idsA = Array.from(first.container.querySelectorAll("h2")).map(
+      h => h.id
+    );
+    first.unmount();
+
+    const second = render(<Markdown content={md} />);
+    const idsB = Array.from(second.container.querySelectorAll("h2")).map(
+      h => h.id
+    );
+
+    expect(idsB).toEqual(idsA);
+  });
 });

@@ -35,37 +35,45 @@ export default function ArticlePage() {
   const [notFound, setNotFound] = useState(false);
 
   useEffect(() => {
+    // 快速连续切换文章时，先发出的请求可能后返回。没有这个标记的话，
+    // 旧文章的响应会覆盖新文章的状态，页面正文和 URL 就对不上了。
+    let cancelled = false;
+
     async function loadArticle() {
       setLoading(true);
       setNotFound(false);
+      // 清空上一篇，避免加载期间短暂显示旧文章的正文/目录
+      setArticle(null);
+      setAdjacentArticles({ prev: null, next: null });
+      setRelatedArticles([]);
 
       const result = await getArticleContent(slug);
-      if (!result) {
+      if (cancelled) return;
+
+      if (!result || !result.published) {
         setNotFound(true);
         setLoading(false);
         return;
       }
 
-      if (!result.published) {
-        setNotFound(true);
-        setLoading(false);
-        return;
-      }
+      // 相邻文章与相关文章互不依赖，并行取，少一个往返
+      const [adjacent, related] = await Promise.all([
+        getAdjacentArticles(slug),
+        getRelatedArticles(slug, 3),
+      ]);
+      if (cancelled) return;
 
       setArticle({ data: result, content: result.content });
-
-      // 获取相邻文章
-      const adjacent = await getAdjacentArticles(slug);
       setAdjacentArticles(adjacent);
-
-      // 获取相关文章
-      const related = await getRelatedArticles(slug, 3);
       setRelatedArticles(related);
-
       setLoading(false);
     }
 
     loadArticle();
+
+    return () => {
+      cancelled = true;
+    };
   }, [slug]);
 
   if (loading) {
@@ -121,7 +129,7 @@ export default function ArticlePage() {
         image={article.data.image}
         type="article"
         publishedTime={article.data.date}
-        keywords={[article.data.category]}
+        keywords={[article.data.category, ...(article.data.tags ?? [])]}
       />
 
       {/* 阅读进度条 */}

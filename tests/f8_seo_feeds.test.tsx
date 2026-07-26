@@ -185,4 +185,99 @@ describe("F8: SEO 元数据集成与 RSS/Sitemap 生成", () => {
     expect(new URL(canonical.href).origin).toBe(new URL(rssArticleLink).origin);
     expect(canonical.href.startsWith(DEFAULT_SITE_URL)).toBe(true);
   });
+
+  // ==========================================
+  // SPA 导航后的元数据清理
+  // ==========================================
+  it("SPA 导航: 从文章页切到普通页面后，article:* 与 keywords 不得残留", () => {
+    // 1. 先渲染一个文章页的 SEO
+    const { rerender } = render(
+      <SEO
+        title="某篇文章"
+        description="文章描述"
+        type="article"
+        publishedTime="2026-07-01"
+        modifiedTime="2026-07-02"
+        author="邢鹏"
+        keywords={["技术", "React"]}
+      />
+    );
+
+    // 2. 确认文章专属元数据存在
+    expect(
+      document.head.querySelector('meta[property="article:published_time"]')
+    ).toBeInTheDocument();
+    expect(
+      document.head.querySelector('meta[property="article:modified_time"]')
+    ).toBeInTheDocument();
+    expect(
+      document.head.querySelector('meta[property="article:author"]')
+    ).toBeInTheDocument();
+    expect(
+      document.head.querySelector('meta[name="keywords"]')
+    ).toBeInTheDocument();
+
+    // 3. 导航到首页（website 类型、无 keywords）
+    rerender(<SEO title="首页" description="首页描述" />);
+
+    // 4. 文章专属元数据必须被移除
+    expect(
+      document.head.querySelector('meta[property="article:published_time"]')
+    ).not.toBeInTheDocument();
+    expect(
+      document.head.querySelector('meta[property="article:modified_time"]')
+    ).not.toBeInTheDocument();
+    expect(
+      document.head.querySelector('meta[property="article:author"]')
+    ).not.toBeInTheDocument();
+    expect(
+      document.head.querySelector('meta[name="keywords"]')
+    ).not.toBeInTheDocument();
+
+    // 5. 首页自身的元数据已更新
+    expect(document.title).toBe("首页 - 邢鹏的博客");
+    const desc = document.head.querySelector(
+      'meta[name="description"]'
+    ) as HTMLMetaElement;
+    expect(desc.content).toBe("首页描述");
+
+    const ogType = document.head.querySelector(
+      'meta[property="og:type"]'
+    ) as HTMLMetaElement;
+    expect(ogType.content).toBe("website");
+
+    // JSON-LD 从 Article 切回 WebSite，且不含文章日期字段
+    const jsonLd = document.getElementById(
+      "structured-data"
+    ) as HTMLScriptElement;
+    const ld = JSON.parse(jsonLd.textContent || "{}");
+    expect(ld["@type"]).toBe("WebSite");
+    expect(ld.datePublished).toBeUndefined();
+    expect(ld.dateModified).toBeUndefined();
+  });
+
+  it("SPA 导航: canonical 与 JSON-LD 全页各自只应存在一个", () => {
+    const { rerender } = render(<SEO title="第一页" />);
+    rerender(<SEO title="第二页" type="article" publishedTime="2026-07-01" />);
+    rerender(<SEO title="第三页" />);
+
+    expect(
+      document.head.querySelectorAll('link[rel="canonical"]')
+    ).toHaveLength(1);
+    expect(document.querySelectorAll("#structured-data")).toHaveLength(1);
+  });
+
+  it("canonical 不应带查询串：?tag=xxx 只是前端筛选状态，不该产生第二个可索引地址", () => {
+    window.history.replaceState({}, "", "/archive?tag=React");
+
+    render(<SEO title="归档" />);
+
+    const canonical = document.head.querySelector(
+      'link[rel="canonical"]'
+    ) as HTMLLinkElement;
+    expect(canonical.href).not.toContain("?");
+    expect(canonical.href).toBe(`${DEFAULT_SITE_URL}/archive`);
+
+    window.history.replaceState({}, "", "/");
+  });
 });

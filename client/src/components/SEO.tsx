@@ -68,10 +68,13 @@ export function SEO({
       element.content = content;
     };
 
+    // 保证同一个 rel 全页只剩一个：多个 canonical 会让搜索引擎无法确定权威地址
     const setLink = (rel: string, href: string) => {
-      let element = document.querySelector(
-        `link[rel="${rel}"]`
-      ) as HTMLLinkElement;
+      const existing = document.querySelectorAll(`link[rel="${rel}"]`);
+      existing.forEach((el, i) => {
+        if (i > 0) el.remove();
+      });
+      let element = existing[0] as HTMLLinkElement | undefined;
       if (!element) {
         element = document.createElement("link");
         element.rel = rel;
@@ -80,14 +83,33 @@ export function SEO({
       element.href = href;
     };
 
+    // SPA 里 head 是跨路由复用的：只写不删，上一页的标签会一直留着。
+    // 从文章页跳回首页后，article:* 和 keywords 会残留在首页上。
+    // querySelectorAll 而不是 querySelector：历史上可能已经插入了重复标签。
+    const removeMetaByName = (name: string) => {
+      document
+        .querySelectorAll(`meta[name="${name}"]`)
+        .forEach(el => el.remove());
+    };
+
+    const removeMetaByProperty = (property: string) => {
+      document
+        .querySelectorAll(`meta[property="${property}"]`)
+        .forEach(el => el.remove());
+    };
+
     // 基础 meta 标签
     setMeta("description", description);
     if (keywordsKey) {
       setMeta("keywords", keywordsKey);
+    } else {
+      removeMetaByName("keywords");
     }
     setMeta("author", author);
 
     // Open Graph / Facebook
+    // canonical/og:url 固定不带查询串与 hash：?tag=xxx 之类只是前端筛选状态，
+    // 带上会让同一篇内容产生多个可索引地址。
     const currentUrl = `${siteUrl}${window.location.pathname}`;
     setProperty("og:type", type);
     setProperty("og:url", currentUrl);
@@ -95,14 +117,23 @@ export function SEO({
     setProperty("og:description", description);
     setProperty("og:image", imageUrl);
     setProperty("og:site_name", siteName);
-    if (type === "article" && publishedTime) {
+
+    // article:* 只属于文章页，切到普通页面必须清掉
+    const isArticle = type === "article";
+    if (isArticle && publishedTime) {
       setProperty("article:published_time", publishedTime);
+    } else {
+      removeMetaByProperty("article:published_time");
     }
-    if (type === "article" && modifiedTime) {
+    if (isArticle && modifiedTime) {
       setProperty("article:modified_time", modifiedTime);
+    } else {
+      removeMetaByProperty("article:modified_time");
     }
-    if (type === "article" && author) {
+    if (isArticle && author) {
       setProperty("article:author", author);
+    } else {
+      removeMetaByProperty("article:author");
     }
 
     // Twitter Card

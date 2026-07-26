@@ -3,12 +3,14 @@ import path from "path";
 import { fileURLToPath } from "url";
 import matter from "gray-matter";
 import { calculateReadTime } from "../shared/read-time.js";
+import { validateArticle, findDuplicateSlugs } from "./validate-article.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 const SOURCE_DIR = path.join(__dirname, "../articles");
 const TARGET_DIR = path.join(__dirname, "../client/public/articles");
+const PUBLIC_DIR = path.join(__dirname, "../client/public");
 const ARTICLES_JSON_PATH = path.join(TARGET_DIR, "articles.json");
 
 // 确保目标目录存在
@@ -35,16 +37,34 @@ function syncArticles() {
     }
   }
 
-  for (const file of files) {
+  // 先整体校验一遍再落盘：任何一篇不合规就中止，不产出半套 articles.json。
+  // 这些问题（带空格的文件名、缺字段、坏日期）如果放过，会一路走到线上
+  // 变成重复收录、坏链接或空白页，那时排查成本高得多。
+  const parsed = files.map(file => {
+    const slug = file.replace(/\.md$/, "");
+    const { data, content } = matter(
+      fs.readFileSync(path.join(SOURCE_DIR, file), "utf-8")
+    );
+    return { file, slug, data, content };
+  });
+
+  const errors = [
+    ...parsed.flatMap(entry =>
+      validateArticle({ ...entry, publicDir: PUBLIC_DIR })
+    ),
+    ...findDuplicateSlugs(parsed),
+  ];
+
+  if (errors.length > 0) {
+    throw new Error(
+      `文章校验未通过，共 ${errors.length} 个问题：\n${errors.join("\n")}\n\n` +
+        `请修正后重新运行 npm run sync。`
+    );
+  }
+
+  for (const { file, slug, data, content } of parsed) {
     const sourcePath = path.join(SOURCE_DIR, file);
     const targetPath = path.join(TARGET_DIR, file);
-    const slug = file.replace(".md", "");
-
-    // 读取文件内容
-    const fileContent = fs.readFileSync(sourcePath, "utf-8");
-
-    // 解析 frontmatter
-    const { data, content } = matter(fileContent);
 
     // 计算阅读时间（如果 frontmatter 中没有）
     const readTime = data.readTime || calculateReadTime(content);
@@ -83,4 +103,9 @@ function syncArticles() {
   console.log(`🎉 已生成 articles.json，共 ${articles.length} 篇文章`);
 }
 
-syncArticles();
+try {
+  syncArticles();
+} catch (error) {
+  console.error(`\n❌ ${error.message}\n`);
+  process.exit(1);
+}

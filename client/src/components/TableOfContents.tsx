@@ -34,24 +34,23 @@ function useHeadings(content: string) {
         )
       );
 
-      const items: TocItem[] = elements.map(elem => ({
-        id: elem.id || `heading-${Math.random().toString(36).substr(2, 9)}`,
+      // ID 一律由 Markdown 渲染阶段（rehype-slug + rehypeHeadingIds）生成，
+      // 目录只负责读取。此前这里对无 ID 的标题补随机 ID，会导致同一篇文章
+      // 每次渲染的锚点都不一样：链接复制出去就失效，预渲染产物也对不上。
+      // 没有 ID 的标题（例如原始 HTML 里手写的 <h2>）直接跳过，不再伪造。
+      const withIds = elements.filter(elem => elem.id);
+
+      const items: TocItem[] = withIds.map(elem => ({
+        id: elem.id,
         text: elem.textContent || "",
         level: parseInt(elem.tagName.substring(1)),
       }));
-
-      // 为没有 ID 的标题添加 ID
-      elements.forEach((elem, index) => {
-        if (!elem.id) {
-          elem.id = items[index].id;
-        }
-      });
 
       setHeadings(items);
 
       // 重新绑定滚动高亮监听
       observer.disconnect();
-      elements.forEach(elem => observer.observe(elem));
+      withIds.forEach(elem => observer.observe(elem));
     };
 
     // 初次提取
