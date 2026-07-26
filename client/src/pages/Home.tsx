@@ -185,7 +185,11 @@ export default function Home() {
         )}
 
         {/* Writing Section */}
-        {displayArticles.length > 0 && (
+        {/* 注意这里判断的是 articles 而不是 displayArticles：
+            displayArticles 会被分类筛选清空，若用它做外层条件，
+            选中一个「排除精选后没有文章」的分类会把筛选按钮一起卸载，
+            用户就再也点不回「全部」。空态由下方内层分支处理。 */}
+        {articles.length > 0 && (
           <section
             ref={writingRef}
             className={cn(

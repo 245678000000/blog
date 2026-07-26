@@ -200,4 +200,37 @@ describe("F2: 首页 Hero 区域、精选卡片与最近文章无刷新分类筛
     const articleLink = screen.getAllByTestId("link-/article/post-1")[0];
     expect(articleLink).toBeInTheDocument();
   });
+
+  it("Tier 2: 选中一个「排除精选文章后没有剩余文章」的分类时，筛选按钮必须保留且显示空态", async () => {
+    // post-1 是精选（articles[0]），且是「技术」分类里唯一一篇。
+    // 选中「技术」后可展示列表为空，但用户必须还能点回「全部」。
+    (articlesModule.getPublishedArticles as any).mockResolvedValue(
+      mockArticles
+    );
+    render(<Home />);
+
+    await waitFor(() => {
+      expect(screen.getByAltText("测试文章第一篇")).toBeInTheDocument();
+    });
+
+    const techTab = screen.getByRole("button", { name: "技术" });
+    await act(async () => {
+      fireEvent.click(techTab);
+    });
+
+    // 空态提示出现（在修复前这段是不可达的死代码）
+    expect(screen.getByText("该分类下暂无文章")).toBeInTheDocument();
+
+    // 关键：筛选按钮没有随着列表一起被卸载，用户能点回「全部」
+    const allTab = screen.getByRole("button", { name: "全部" });
+    expect(allTab).toBeInTheDocument();
+
+    await act(async () => {
+      fireEvent.click(allTab);
+    });
+
+    // 点回「全部」后列表恢复
+    expect(screen.queryByText("该分类下暂无文章")).not.toBeInTheDocument();
+    expect(screen.getByText(/具有极其冗长的标题/)).toBeInTheDocument();
+  });
 });
