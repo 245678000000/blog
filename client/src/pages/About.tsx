@@ -146,7 +146,7 @@ const timeline = [
   {
     year: "2023.06 - 2023.08",
     title: "实习律师助理",
-    organization: "缓化正达律师事务所 · 上海",
+    organization: "绥化正达律师事务所 · 上海",
     description:
       "数据清洗、深度检索，将非结构化法律文本转化为可检索、可分析的结构化数据。",
     icon: Briefcase,
