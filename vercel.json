@@ -23,8 +23,8 @@
   ],
   "rewrites": [
     {
-      "source": "/((?!api|articles|images|rss\\.xml|sitemap\\.xml|robots\\.txt|favicon\\.svg).*)",
-      "destination": "/index.html"
+      "source": "/((?!api|articles|images|assets|og|rss\\.xml|sitemap\\.xml|robots\\.txt|favicon\\.svg|manifest\\.json|sw\\.js).*)",
+      "destination": "/"
     }
   ]
 }
