@@ -6,7 +6,8 @@ export function ReadingProgress() {
   useEffect(() => {
     const updateProgress = () => {
       const scrollTop = window.scrollY;
-      const docHeight = document.documentElement.scrollHeight - window.innerHeight;
+      const docHeight =
+        document.documentElement.scrollHeight - window.innerHeight;
       const scrollPercent = docHeight > 0 ? (scrollTop / docHeight) * 100 : 0;
       setProgress(Math.min(100, Math.max(0, scrollPercent)));
     };
@@ -25,10 +26,21 @@ export function ReadingProgress() {
   }, []);
 
   return (
-    <div className="fixed top-0 left-0 right-0 z-[100] h-1 bg-transparent">
+    <div
+      className="fixed top-0 left-0 right-0 z-[100] h-1 bg-transparent"
+      role="progressbar"
+      aria-label="阅读进度"
+      aria-valuemin={0}
+      aria-valuemax={100}
+      aria-valuenow={Math.round(progress)}
+    >
       <div
+        data-testid="reading-progress-bar"
         className="h-full bg-gradient-to-r from-primary via-primary to-accent-foreground transition-all duration-150 ease-out"
-        style={{ width: `${progress}%`, boxShadow: progress > 0 ? '0 0 8px var(--primary)' : 'none' }}
+        style={{
+          width: `${progress}%`,
+          boxShadow: progress > 0 ? "0 0 8px var(--primary)" : "none",
+        }}
       />
     </div>
   );

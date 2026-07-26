@@ -1,4 +1,10 @@
-import { render, screen, fireEvent, waitFor, act } from "@testing-library/react";
+import {
+  render,
+  screen,
+  fireEvent,
+  waitFor,
+  act,
+} from "@testing-library/react";
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import React from "react";
 import Archive from "@/pages/Archive";
@@ -25,7 +31,9 @@ vi.mock("wouter", () => ({
 
 // Mock SEO
 vi.mock("@/components/SEO", () => ({
-  SEO: ({ title }: { title: string }) => <div data-testid="seo-title">{title}</div>,
+  SEO: ({ title }: { title: string }) => (
+    <div data-testid="seo-title">{title}</div>
+  ),
 }));
 
 const mockArticles = [
@@ -81,9 +89,13 @@ describe("F6: 归档页年/月轴线归档列表与标签/分类 URL 参数监�
     // 模拟 URL 输入 ?tag=React
     mockSearchString = "?tag=React";
 
-    vi.spyOn(articlesModule, "getPublishedArticles").mockResolvedValue(mockArticles as any);
+    vi.spyOn(articlesModule, "getPublishedArticles").mockResolvedValue(
+      mockArticles as any
+    );
     vi.spyOn(articlesModule, "getAllTags").mockResolvedValue(mockTags);
-    vi.spyOn(articlesModule, "getAllCategories").mockResolvedValue(mockCategories);
+    vi.spyOn(articlesModule, "getAllCategories").mockResolvedValue(
+      mockCategories
+    );
 
     render(<Archive />);
 
@@ -108,9 +120,13 @@ describe("F6: 归档页年/月轴线归档列表与标签/分类 URL 参数监�
   it("Tier 2: 当传入不存在的标签时，不崩溃且友好地展示空提示", async () => {
     mockSearchString = "?tag=NonExist";
 
-    vi.spyOn(articlesModule, "getPublishedArticles").mockResolvedValue(mockArticles as any);
+    vi.spyOn(articlesModule, "getPublishedArticles").mockResolvedValue(
+      mockArticles as any
+    );
     vi.spyOn(articlesModule, "getAllTags").mockResolvedValue(mockTags);
-    vi.spyOn(articlesModule, "getAllCategories").mockResolvedValue(mockCategories);
+    vi.spyOn(articlesModule, "getAllCategories").mockResolvedValue(
+      mockCategories
+    );
 
     render(<Archive />);
 
@@ -134,7 +150,9 @@ describe("F6: 归档页年/月轴线归档列表与标签/分类 URL 参数监�
       },
     ];
 
-    vi.spyOn(articlesModule, "getPublishedArticles").mockResolvedValue(malformedArticles as any);
+    vi.spyOn(articlesModule, "getPublishedArticles").mockResolvedValue(
+      malformedArticles as any
+    );
     vi.spyOn(articlesModule, "getAllTags").mockResolvedValue([]);
     vi.spyOn(articlesModule, "getAllCategories").mockResolvedValue([]);
 
@@ -152,9 +170,13 @@ describe("F6: 归档页年/月轴线归档列表与标签/分类 URL 参数监�
   it("Tier 3: 用户点击标签 Badge 应当即时重滤列表并在无刷新下将新参数推送到 URL history 状态中", async () => {
     mockSearchString = "";
 
-    vi.spyOn(articlesModule, "getPublishedArticles").mockResolvedValue(mockArticles as any);
+    vi.spyOn(articlesModule, "getPublishedArticles").mockResolvedValue(
+      mockArticles as any
+    );
     vi.spyOn(articlesModule, "getAllTags").mockResolvedValue(mockTags);
-    vi.spyOn(articlesModule, "getAllCategories").mockResolvedValue(mockCategories);
+    vi.spyOn(articlesModule, "getAllCategories").mockResolvedValue(
+      mockCategories
+    );
 
     const { rerender } = render(<Archive />);
 
@@ -168,7 +190,7 @@ describe("F6: 归档页年/月轴线归档列表与标签/分类 URL 参数监�
     await act(async () => {
       fireEvent.click(tagBadge);
     });
-    
+
     rerender(<Archive />);
 
     // 过滤列表应只剩 React 文章，2025 年的文章（Tailwind）被过滤
@@ -179,9 +201,13 @@ describe("F6: 归档页年/月轴线归档列表与标签/分类 URL 参数监�
   // Tier 4: 真实世界场景 (Real-World Scenarios)
   // ==========================================
   it("Tier 4: 用户打开归档页、点击分类标签进行过滤、然后点击清除过滤还原列表的完整流程仿真", async () => {
-    vi.spyOn(articlesModule, "getPublishedArticles").mockResolvedValue(mockArticles as any);
+    vi.spyOn(articlesModule, "getPublishedArticles").mockResolvedValue(
+      mockArticles as any
+    );
     vi.spyOn(articlesModule, "getAllTags").mockResolvedValue(mockTags);
-    vi.spyOn(articlesModule, "getAllCategories").mockResolvedValue(mockCategories);
+    vi.spyOn(articlesModule, "getAllCategories").mockResolvedValue(
+      mockCategories
+    );
 
     const { rerender } = render(<Archive />);
 
@@ -195,7 +221,7 @@ describe("F6: 归档页年/月轴线归档列表与标签/分类 URL 参数监�
     await act(async () => {
       fireEvent.click(designBadge);
     });
-    
+
     rerender(<Archive />);
 
     // 3. 验证此时只有设计类文章渲染出来，且有 (已筛选) 标示
@@ -208,13 +234,17 @@ describe("F6: 归档页年/月轴线归档列表与标签/分类 URL 参数监�
     await act(async () => {
       fireEvent.click(clearBtn);
     });
-    
+
     rerender(<Archive />);
 
     // 5. 验证归档列表恢复到初始全部加载状态，URL 重新清空
     expect(screen.getByText("共 3 篇文章")).toBeInTheDocument();
     expect(screen.getByText("第一篇 2026 的文章")).toBeInTheDocument();
     expect(screen.getByText("第三篇 2025 的文章")).toBeInTheDocument();
-    expect(window.history.replaceState).toHaveBeenCalledWith({}, "", "/archive");
+    expect(window.history.replaceState).toHaveBeenCalledWith(
+      {},
+      "",
+      "/archive"
+    );
   });
 });

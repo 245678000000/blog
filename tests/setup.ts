@@ -4,7 +4,7 @@ import { vi } from "vitest";
 // Mock window.matchMedia 解决 jsdom 下不支持 media query 的问题
 Object.defineProperty(window, "matchMedia", {
   writable: true,
-  value: vi.fn().mockImplementation((query) => ({
+  value: vi.fn().mockImplementation(query => ({
     matches: false,
     media: query,
     onchange: null,
@@ -32,17 +32,18 @@ const mockObserve = vi.fn();
 const mockUnobserve = vi.fn();
 const mockDisconnect = vi.fn();
 
-const IntersectionObserverMock = vi.fn().mockImplementation((callback, options) => {
-  return {
-    observe: mockObserve,
-    unobserve: mockUnobserve,
-    disconnect: mockDisconnect,
-    root: null,
-    rootMargin: "",
-    thresholds: [],
-    takeRecords: () => [],
-  };
-});
+const IntersectionObserverMock = vi
+  .fn()
+  .mockImplementation((_callback, _options) => {
+    return {
+      observe: mockObserve,
+      unobserve: mockUnobserve,
+      disconnect: mockDisconnect,
+      root: null,
+      rootMargin: "",
+      thresholds: [],
+      takeRecords: () => [],
+    };
+  });
 
 window.IntersectionObserver = IntersectionObserverMock as any;
-

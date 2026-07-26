@@ -20,7 +20,9 @@ export default function Archive() {
 
   const [articles, setArticles] = useState<Article[]>([]);
   const [tags, setTags] = useState<{ tag: string; count: number }[]>([]);
-  const [categories, setCategories] = useState<{ category: string; count: number }[]>([]);
+  const [categories, setCategories] = useState<
+    { category: string; count: number }[]
+  >([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -39,22 +41,27 @@ export default function Archive() {
   }, []);
 
   // 根据筛选条件过滤文章
-  const filteredArticles = articles.filter((article) => {
+  const filteredArticles = articles.filter(article => {
     if (selectedTag && !article.tags?.includes(selectedTag)) return false;
     if (selectedCategory && article.category !== selectedCategory) return false;
     return true;
   });
 
   // 按年份分组
-  const articlesByYear = filteredArticles.reduce((acc, article) => {
-    const year = article.date.split("-")[0];
-    if (!acc[year]) acc[year] = [];
-    acc[year].push(article);
-    return acc;
-  }, {} as Record<string, Article[]>);
+  const articlesByYear = filteredArticles.reduce(
+    (acc, article) => {
+      const year = article.date.split("-")[0];
+      if (!acc[year]) acc[year] = [];
+      acc[year].push(article);
+      return acc;
+    },
+    {} as Record<string, Article[]>
+  );
 
   // 年份倒序排列
-  const sortedYears = Object.keys(articlesByYear).sort((a, b) => b.localeCompare(a));
+  const sortedYears = Object.keys(articlesByYear).sort((a, b) =>
+    b.localeCompare(a)
+  );
 
   const updateFilters = (tag: string | null, category: string | null) => {
     const newParams = new URLSearchParams(searchString);
@@ -104,7 +111,7 @@ export default function Archive() {
           </div>
           {/* 列表骨架 */}
           <div className="space-y-6">
-            {[1, 2, 3, 4].map((i) => (
+            {[1, 2, 3, 4].map(i => (
               <div key={i} className="flex items-center gap-4 py-3">
                 <div className="h-4 w-16 rounded bg-muted" />
                 <div className="h-5 flex-1 rounded bg-muted" />
@@ -119,19 +126,20 @@ export default function Archive() {
 
   return (
     <>
-      <SEO
-        title="归档"
-        description={`共 ${articles.length} 篇文章`}
-      />
+      <SEO title="归档" description={`共 ${articles.length} 篇文章`} />
 
       <div className="container max-w-4xl py-12 animate-in fade-in duration-700">
         {/* 页面标题 */}
         <div className="flex flex-col gap-4 mb-12">
           <div className="flex items-center gap-4">
             <div className="h-[1px] w-12 bg-primary"></div>
-            <span className="text-sm font-mono tracking-widest uppercase text-primary">Archive</span>
+            <span className="text-sm font-mono tracking-widest uppercase text-primary">
+              Archive
+            </span>
           </div>
-          <h1 className="text-4xl md:text-5xl font-serif font-bold">文章归档</h1>
+          <h1 className="text-4xl md:text-5xl font-serif font-bold">
+            文章归档
+          </h1>
           <p className="text-lg text-muted-foreground">
             共 {filteredArticles.length} 篇文章
             {hasFilters && ` (已筛选)`}
@@ -166,7 +174,12 @@ export default function Archive() {
                   <X className="w-3 h-3 ml-1" />
                 </Badge>
               )}
-              <Button variant="ghost" size="sm" onClick={clearFilters} className="text-xs">
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={clearFilters}
+                className="text-xs"
+              >
                 清除全部
               </Button>
             </div>
@@ -181,14 +194,21 @@ export default function Archive() {
               {categories.map(({ category, count }) => (
                 <Button
                   key={category}
-                  variant={selectedCategory === category ? "secondary" : "ghost"}
+                  variant={
+                    selectedCategory === category ? "secondary" : "ghost"
+                  }
                   size="sm"
                   className={
                     selectedCategory === category
                       ? "rounded-full bg-primary text-primary-foreground hover:bg-primary/90"
                       : "rounded-full hover:bg-secondary"
                   }
-                  onClick={() => updateFilters(null, selectedCategory === category ? "" : category)}
+                  onClick={() =>
+                    updateFilters(
+                      null,
+                      selectedCategory === category ? "" : category
+                    )
+                  }
                 >
                   {category}
                   <span className="ml-1.5 text-xs opacity-60">({count})</span>
@@ -211,7 +231,9 @@ export default function Archive() {
                       ? "bg-primary text-primary-foreground"
                       : "bg-secondary/50 text-muted-foreground hover:bg-primary/20 hover:text-primary"
                   }`}
-                  onClick={() => updateFilters(selectedTag === tag ? "" : tag, null)}
+                  onClick={() =>
+                    updateFilters(selectedTag === tag ? "" : tag, null)
+                  }
                 >
                   #{tag}
                   <span className="ml-1 opacity-60">({count})</span>
@@ -224,11 +246,13 @@ export default function Archive() {
         {/* 时间线 */}
         {sortedYears.length > 0 ? (
           <div className="space-y-12">
-            {sortedYears.map((year) => (
+            {sortedYears.map(year => (
               <div key={year} className="relative">
                 {/* 年份标题 */}
                 <div className="flex items-center gap-4 mb-6">
-                  <h2 className="text-2xl font-serif font-bold text-primary">{year}</h2>
+                  <h2 className="text-2xl font-serif font-bold text-primary">
+                    {year}
+                  </h2>
                   <div className="h-[1px] flex-1 bg-border"></div>
                   <span className="text-sm text-muted-foreground">
                     {articlesByYear[year].length} 篇
@@ -237,7 +261,7 @@ export default function Archive() {
 
                 {/* 文章列表 */}
                 <div className="space-y-4 pl-4 border-l-2 border-border/50">
-                  {articlesByYear[year].map((article) => (
+                  {articlesByYear[year].map(article => (
                     <Link key={article.slug} href={`/article/${article.slug}`}>
                       <div className="group relative pl-6 py-3 -ml-[9px] cursor-pointer">
                         {/* 时间线圆点 */}
@@ -264,8 +288,11 @@ export default function Archive() {
                         {/* 标签 */}
                         {article.tags && article.tags.length > 0 && (
                           <div className="flex gap-1.5 mt-2 pl-0 md:pl-[96px]">
-                            {article.tags.slice(0, 3).map((tag) => (
-                              <span key={tag} className="text-xs text-muted-foreground">
+                            {article.tags.slice(0, 3).map(tag => (
+                              <span
+                                key={tag}
+                                className="text-xs text-muted-foreground"
+                              >
                                 #{tag}
                               </span>
                             ))}

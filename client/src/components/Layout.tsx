@@ -39,26 +39,33 @@ export default function Layout({ children }: { children: React.ReactNode }) {
       <header
         className={cn(
           "fixed top-0 left-0 right-0 z-50 transition-all duration-300 ease-in-out",
-          isScrolled ? "bg-background/80 backdrop-blur-md py-4 shadow-sm" : "bg-transparent py-6"
+          isScrolled
+            ? "bg-background/80 backdrop-blur-md py-4 shadow-sm"
+            : "bg-transparent py-6"
         )}
       >
         <div className="container flex items-center justify-between">
-          <Link href="/" className="text-2xl font-serif font-bold tracking-tight hover:text-primary transition-colors">
+          <Link
+            href="/"
+            className="text-2xl font-serif font-bold tracking-tight hover:text-primary transition-colors"
+          >
             xing <span className="text-primary">peng</span>
           </Link>
 
           {/* Desktop Nav */}
           <nav className="hidden md:flex items-center gap-6">
-            {navLinks.map((link) => (
+            {navLinks.map(link =>
               link.href.startsWith("/#") ? (
                 <a
                   key={link.href}
                   href={link.href}
                   className="text-sm font-medium transition-colors hover:text-primary link-underline text-muted-foreground"
-                  onClick={(e) => {
+                  onClick={e => {
                     e.preventDefault();
                     const id = link.href.substring(2);
-                    document.getElementById(id)?.scrollIntoView({ behavior: 'smooth' });
+                    document
+                      .getElementById(id)
+                      ?.scrollIntoView({ behavior: "smooth" });
                   }}
                 >
                   {link.label}
@@ -69,13 +76,15 @@ export default function Layout({ children }: { children: React.ReactNode }) {
                   href={link.href}
                   className={cn(
                     "text-sm font-medium transition-colors hover:text-primary link-underline",
-                    location === link.href ? "text-primary" : "text-muted-foreground"
+                    location === link.href
+                      ? "text-primary"
+                      : "text-muted-foreground"
                   )}
                 >
                   {link.label}
                 </Link>
               )
-            ))}
+            )}
             <SearchButton />
             <a
               href="/rss.xml"
@@ -92,13 +101,17 @@ export default function Layout({ children }: { children: React.ReactNode }) {
               onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
               className="rounded-full hover:bg-primary/10 hover:text-primary"
             >
-              {theme === "dark" ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
+              {theme === "dark" ? (
+                <Sun className="h-5 w-5" />
+              ) : (
+                <Moon className="h-5 w-5" />
+              )}
             </Button>
           </nav>
 
           {/* Mobile Menu Toggle */}
           <div className="flex items-center gap-4 md:hidden">
-             <Button
+            <Button
               variant="ghost"
               size="icon"
               data-testid="theme-toggle"
@@ -106,7 +119,11 @@ export default function Layout({ children }: { children: React.ReactNode }) {
               onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
               className="rounded-full hover:bg-primary/10 hover:text-primary"
             >
-              {theme === "dark" ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
+              {theme === "dark" ? (
+                <Sun className="h-5 w-5" />
+              ) : (
+                <Moon className="h-5 w-5" />
+              )}
             </Button>
             <Button
               variant="ghost"
@@ -117,7 +134,11 @@ export default function Layout({ children }: { children: React.ReactNode }) {
               onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
               className="text-foreground"
             >
-              {isMobileMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
+              {isMobileMenuOpen ? (
+                <X className="h-6 w-6" />
+              ) : (
+                <Menu className="h-6 w-6" />
+              )}
             </Button>
           </div>
         </div>
@@ -130,17 +151,19 @@ export default function Layout({ children }: { children: React.ReactNode }) {
             aria-modal="true"
             aria-label="移动导航菜单"
           >
-            {navLinks.map((link) => (
+            {navLinks.map(link =>
               link.href.startsWith("/#") ? (
                 <a
                   key={link.href}
                   href={link.href}
                   className="text-lg font-medium py-2 px-4 rounded-md hover:bg-primary/10 hover:text-primary transition-colors text-foreground"
-                  onClick={(e) => {
+                  onClick={e => {
                     e.preventDefault();
                     setIsMobileMenuOpen(false);
                     const id = link.href.substring(2);
-                    document.getElementById(id)?.scrollIntoView({ behavior: 'smooth' });
+                    document
+                      .getElementById(id)
+                      ?.scrollIntoView({ behavior: "smooth" });
                   }}
                 >
                   {link.label}
@@ -151,14 +174,16 @@ export default function Layout({ children }: { children: React.ReactNode }) {
                   href={link.href}
                   className={cn(
                     "text-lg font-medium py-2 px-4 rounded-md hover:bg-primary/10 hover:text-primary transition-colors",
-                    location === link.href ? "text-primary bg-primary/5" : "text-foreground"
+                    location === link.href
+                      ? "text-primary bg-primary/5"
+                      : "text-foreground"
                   )}
                   onClick={() => setIsMobileMenuOpen(false)}
                 >
                   {link.label}
                 </Link>
               )
-            ))}
+            )}
             <div className="py-2 px-4">
               <SearchButton />
             </div>
@@ -173,7 +198,9 @@ export default function Layout({ children }: { children: React.ReactNode }) {
       <footer className="py-12 border-t border-border/50 bg-background/50">
         <div className="container flex flex-col items-center gap-8">
           {/* 签名 */}
-          <p className="text-muted-foreground italic font-serif">“用 Code 和 AI 解决问题，拒绝空谈。”</p>
+          <p className="text-muted-foreground italic font-serif">
+            “用 Code 和 AI 解决问题，拒绝空谈。”
+          </p>
 
           {/* 社交图标 */}
           <div className="flex items-center gap-4">
@@ -212,10 +239,30 @@ export default function Layout({ children }: { children: React.ReactNode }) {
             </div>
 
             <nav className="flex flex-wrap justify-center gap-4 md:gap-6">
-              <Link href="/" className="text-sm text-muted-foreground hover:text-primary transition-colors">首页</Link>
-              <Link href="/archive" className="text-sm text-muted-foreground hover:text-primary transition-colors">归档</Link>
-              <Link href="/about" className="text-sm text-muted-foreground hover:text-primary transition-colors">关于</Link>
-              <Link href="/contact" className="text-sm text-muted-foreground hover:text-primary transition-colors">联系</Link>
+              <Link
+                href="/"
+                className="text-sm text-muted-foreground hover:text-primary transition-colors"
+              >
+                首页
+              </Link>
+              <Link
+                href="/archive"
+                className="text-sm text-muted-foreground hover:text-primary transition-colors"
+              >
+                归档
+              </Link>
+              <Link
+                href="/about"
+                className="text-sm text-muted-foreground hover:text-primary transition-colors"
+              >
+                关于
+              </Link>
+              <Link
+                href="/contact"
+                className="text-sm text-muted-foreground hover:text-primary transition-colors"
+              >
+                联系
+              </Link>
             </nav>
           </div>
         </div>

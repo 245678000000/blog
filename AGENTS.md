@@ -66,14 +66,14 @@ tags: ["标签1", "标签2"]
 
 ## 构建命令
 
-| 命令 | 作用 |
-|------|------|
-| `npm run dev` | 启动开发服务器（端口 3000，自动 sync） |
-| `npm run build` | 完整构建（sync + vite + feeds + OG + prerender） |
-| `npm run check` | TypeScript 类型检查 |
-| `npm run test` | Vitest 单元测试 |
-| `npm run test:e2e` | Playwright E2E 测试 |
-| `npm run format` | Prettier 格式化 |
+| 命令               | 作用                                             |
+| ------------------ | ------------------------------------------------ |
+| `npm run dev`      | 启动开发服务器（端口 3000，自动 sync）           |
+| `npm run build`    | 完整构建（sync + vite + feeds + OG + prerender） |
+| `npm run check`    | TypeScript 类型检查                              |
+| `npm run test`     | Vitest 单元测试                                  |
+| `npm run test:e2e` | Playwright E2E 测试                              |
+| `npm run format`   | Prettier 格式化                                  |
 
 ## 技术栈
 

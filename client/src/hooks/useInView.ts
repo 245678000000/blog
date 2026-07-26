@@ -11,6 +11,12 @@ export function useInView<T extends HTMLElement = HTMLDivElement>(
   const [isVisible, setIsVisible] = useState(false);
   const observerRef = useRef<IntersectionObserver | null>(null);
 
+  // 调用方通常直接传对象字面量，把 options 放进 useCallback 依赖会让 ref
+  // 每次渲染都换新身份，导致 React 反复解绑/重绑并重建 observer。
+  // 存进 ref 既能保持回调稳定，又能读到最新的 options。
+  const optionsRef = useRef(options);
+  optionsRef.current = options;
+
   const ref = useCallback(
     (node: T | null) => {
       // 清理旧的 observer
@@ -28,7 +34,7 @@ export function useInView<T extends HTMLElement = HTMLDivElement>(
             observerRef.current?.disconnect();
           }
         },
-        { threshold: 0.1, ...options }
+        { threshold: 0.1, ...optionsRef.current }
       );
 
       observerRef.current.observe(node);

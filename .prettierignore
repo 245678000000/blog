@@ -1,5 +1,16 @@
 dist
 node_modules
 .git
+.snapshots
 *.min.js
 *.min.css
+
+# 文章正文由人手写，交给 Prettier 会重排列表/表格/强调语法
+articles
+client/public/articles
+
+# 生成物与锁文件
+package-lock.json
+client/public/og
+playwright-report
+test-results

@@ -24,11 +24,13 @@ export function Analytics() {
 
   // Umami 配置
   const umamiWebsiteId = import.meta.env.VITE_UMAMI_WEBSITE_ID || "";
-  const umamiSrc = import.meta.env.VITE_UMAMI_SRC || "https://cloud.umami.is/script.js";
+  const umamiSrc =
+    import.meta.env.VITE_UMAMI_SRC || "https://cloud.umami.is/script.js";
 
   // Plausible 配置
   const plausibleDomain = import.meta.env.VITE_PLAUSIBLE_DOMAIN || "";
-  const plausibleSrc = import.meta.env.VITE_PLAUSIBLE_SRC || "https://plausible.io/js/script.js";
+  const plausibleSrc =
+    import.meta.env.VITE_PLAUSIBLE_SRC || "https://plausible.io/js/script.js";
 
   // Google Analytics 配置
   const gaId = import.meta.env.VITE_GA_ID || "";
@@ -56,7 +58,7 @@ export function Analytics() {
 
   // 加载 Umami
   function loadUmami() {
-    if (document.querySelector('script[data-website-id]')) return;
+    if (document.querySelector("script[data-website-id]")) return;
 
     const script = document.createElement("script");
     script.defer = true;
@@ -67,7 +69,7 @@ export function Analytics() {
 
   // 加载 Plausible
   function loadPlausible() {
-    if (document.querySelector('script[data-domain]')) return;
+    if (document.querySelector("script[data-domain]")) return;
 
     const script = document.createElement("script");
     script.defer = true;

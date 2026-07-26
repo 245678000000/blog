@@ -24,7 +24,10 @@ export function ThemeProvider({
       return stored;
     }
     // 首次访问时跟随系统偏好
-    if (typeof window !== "undefined" && window.matchMedia("(prefers-color-scheme: light)").matches) {
+    if (
+      typeof window !== "undefined" &&
+      window.matchMedia("(prefers-color-scheme: light)").matches
+    ) {
       return "light";
     }
     return defaultTheme;

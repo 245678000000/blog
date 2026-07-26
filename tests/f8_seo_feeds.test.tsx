@@ -1,15 +1,16 @@
-import { render, waitFor, act } from "@testing-library/react";
-import { describe, it, expect, vi, beforeEach } from "vitest";
+import { render } from "@testing-library/react";
+import { describe, it, expect, beforeEach } from "vitest";
 import React from "react";
 import { SEO } from "@/components/SEO";
+import { DEFAULT_SITE_URL } from "@shared/site";
 
 describe("F8: SEO 元数据集成与 RSS/Sitemap 生成", () => {
   beforeEach(() => {
     // 清理 head 中的元素，以免测试互相干扰
     const metas = document.head.querySelectorAll("meta");
-    metas.forEach((m) => m.remove());
+    metas.forEach(m => m.remove());
     const links = document.head.querySelectorAll("link");
-    links.forEach((l) => l.remove());
+    links.forEach(l => l.remove());
     const script = document.getElementById("structured-data");
     if (script) script.remove();
     document.title = "";
@@ -31,23 +32,29 @@ describe("F8: SEO 元数据集成与 RSS/Sitemap 生成", () => {
     expect(document.title).toBe("测试标题 - 邢鹏的博客");
 
     // 验证 Description 元数据
-    const descMeta = document.head.querySelector('meta[name="description"]') as HTMLMetaElement;
+    const descMeta = document.head.querySelector(
+      'meta[name="description"]'
+    ) as HTMLMetaElement;
     expect(descMeta).toBeInTheDocument();
     expect(descMeta.content).toBe("这是一个用于测试的描述内容。");
 
     // 验证 Keywords 元数据
-    const keywordsMeta = document.head.querySelector('meta[name="keywords"]') as HTMLMetaElement;
+    const keywordsMeta = document.head.querySelector(
+      'meta[name="keywords"]'
+    ) as HTMLMetaElement;
     expect(keywordsMeta).toBeInTheDocument();
     expect(keywordsMeta.content).toBe("测试, React");
 
     // 验证 Canonical Link
-    const canonicalLink = document.head.querySelector('link[rel="canonical"]') as HTMLLinkElement;
+    const canonicalLink = document.head.querySelector(
+      'link[rel="canonical"]'
+    ) as HTMLLinkElement;
     expect(canonicalLink).toBeInTheDocument();
-    expect(canonicalLink.href).toContain("yourdomain.com");
+    expect(canonicalLink.href).toContain(DEFAULT_SITE_URL);
   });
 
   it("Tier 1: XML Feeds 生成函数应能拼装合法的 Sitemap 与 RSS XML 字符串", () => {
-    // 仿真模拟 server/index.ts 中的 XML 组装逻辑进行测试
+    // 仿真模拟 scripts/generate-feeds.js 中的 XML 组装逻辑进行测试
     const siteUrl = "https://testdomain.com";
     const mockArticles = [
       {
@@ -62,22 +69,29 @@ describe("F8: SEO 元数据集成与 RSS/Sitemap 生成", () => {
 
     // 1. Sitemap 生成逻辑断言
     const sitemapUrls = mockArticles.map(
-      (a) => `<url><loc>${siteUrl}/article/${a.slug}</loc><lastmod>${a.date}</lastmod></url>`
+      a =>
+        `<url><loc>${siteUrl}/article/${a.slug}</loc><lastmod>${a.date}</lastmod></url>`
     );
     const sitemapXml = `<?xml version="1.0" encoding="UTF-8"?><urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">${sitemapUrls.join("")}</urlset>`;
-    
-    expect(sitemapXml).toContain("<loc>https://testdomain.com/article/my-first-post</loc>");
+
+    expect(sitemapXml).toContain(
+      "<loc>https://testdomain.com/article/my-first-post</loc>"
+    );
     expect(sitemapXml).toContain("<lastmod>2026-07-01</lastmod>");
 
     // 2. RSS 生成逻辑断言
-    const rssItems = mockArticles.map((a) => {
-      const articleUrl = `${siteUrl}/article/${a.slug}`;
-      return `<item><title><![CDATA[${a.title}]]></title><link>${articleUrl}</link><description><![CDATA[${a.description}]]></description></item>`;
-    }).join("");
+    const rssItems = mockArticles
+      .map(a => {
+        const articleUrl = `${siteUrl}/article/${a.slug}`;
+        return `<item><title><![CDATA[${a.title}]]></title><link>${articleUrl}</link><description><![CDATA[${a.description}]]></description></item>`;
+      })
+      .join("");
     const rssXml = `<?xml version="1.0" encoding="UTF-8"?><rss version="2.0"><channel>${rssItems}</channel></rss>`;
 
     expect(rssXml).toContain("<title><![CDATA[文章标题一]]></title>");
-    expect(rssXml).toContain("<link>https://testdomain.com/article/my-first-post</link>");
+    expect(rssXml).toContain(
+      "<link>https://testdomain.com/article/my-first-post</link>"
+    );
   });
 
   // ==========================================
@@ -87,7 +101,9 @@ describe("F8: SEO 元数据集成与 RSS/Sitemap 生成", () => {
     render(<SEO title="无描述文章" />);
 
     // 验证回退到 siteName 默认的描述
-    const descMeta = document.head.querySelector('meta[name="description"]') as HTMLMetaElement;
+    const descMeta = document.head.querySelector(
+      'meta[name="description"]'
+    ) as HTMLMetaElement;
     expect(descMeta).toBeInTheDocument();
     expect(descMeta.content).toContain("AI Native 开发者");
   });
@@ -119,7 +135,9 @@ describe("F8: SEO 元数据集成与 RSS/Sitemap 生成", () => {
     rerender(<SEO title="归档" description="文章列表" />);
     expect(document.title).toBe("归档 - 邢鹏的博客");
 
-    const descMeta = document.head.querySelector('meta[name="description"]') as HTMLMetaElement;
+    const descMeta = document.head.querySelector(
+      'meta[name="description"]'
+    ) as HTMLMetaElement;
     expect(descMeta.content).toBe("文章列表");
   });
 
@@ -132,8 +150,12 @@ describe("F8: SEO 元数据集成与 RSS/Sitemap 生成", () => {
     expect(document.title).toBe("首页 - 邢鹏的博客");
 
     // 2. 爬虫抓取 Canonical Link 与 Description
-    let canonical = document.head.querySelector('link[rel="canonical"]') as HTMLLinkElement;
-    let description = document.head.querySelector('meta[name="description"]') as HTMLMetaElement;
+    const canonical = document.head.querySelector(
+      'link[rel="canonical"]'
+    ) as HTMLLinkElement;
+    const description = document.head.querySelector(
+      'meta[name="description"]'
+    ) as HTMLMetaElement;
     expect(description.content).toBe("邢鹏的首页");
 
     // 3. 页面跳转至具体文章
@@ -147,16 +169,20 @@ describe("F8: SEO 元数据集成与 RSS/Sitemap 生成", () => {
     );
 
     // 4. 爬虫抓取结构化数据 JSON-LD
-    const jsonLdScript = document.getElementById("structured-data") as HTMLScriptElement;
+    const jsonLdScript = document.getElementById(
+      "structured-data"
+    ) as HTMLScriptElement;
     expect(jsonLdScript).toBeInTheDocument();
     const ldData = JSON.parse(jsonLdScript.textContent || "{}");
     expect(ldData["@type"]).toBe("Article");
     expect(ldData["name"]).toBe("React 19 教程 - 邢鹏的博客");
     expect(ldData["datePublished"]).toBe("2026-07-14");
 
-    // 5. 抓取 RSS 并检查文章 URL 是否与 Head 里的 Canonical 保持一致
-    const rssArticleLink = `https://yourdomain.com/article/react-19-tutorial`;
-    const canonicalHref = canonical.href; // 应该与 RSS 的 link 代表的地址规则一致
-    expect(rssArticleLink).toContain("/article/react-19-tutorial");
+    // 5. 抓取 RSS 并检查文章 URL 是否与 Head 里的 Canonical 同源
+    // RSS 由 scripts/generate-feeds.js 用同一个站点域名拼装，两者必须一致，
+    // 否则搜索引擎会把同一篇文章当成两个不同的地址。
+    const rssArticleLink = `${DEFAULT_SITE_URL}/article/react-19-tutorial`;
+    expect(new URL(canonical.href).origin).toBe(new URL(rssArticleLink).origin);
+    expect(canonical.href.startsWith(DEFAULT_SITE_URL)).toBe(true);
   });
 });

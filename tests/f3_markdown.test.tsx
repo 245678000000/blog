@@ -5,7 +5,13 @@ import { Markdown } from "@/components/Markdown";
 
 // Mock 懒加载的高亮组件
 vi.mock("react-syntax-highlighter/dist/esm/prism-async-light", () => ({
-  default: ({ children, language }: { children: React.ReactNode; language: string }) => (
+  default: ({
+    children,
+    language,
+  }: {
+    children: React.ReactNode;
+    language: string;
+  }) => (
     <pre data-testid="syntax-highlighter" data-language={language}>
       {children}
     </pre>
@@ -35,8 +41,14 @@ describe("F3: 文章详情页 Markdown 渲染与代码块语法高亮", () => {
     render(<Markdown content={rawMarkdown} />);
 
     // 验证 Heading 渲染
-    expect(screen.getByRole("heading", { level: 1, name: "一级标题" })).toBeInTheDocument();
-    expect(screen.getByRole("heading", { level: 2, name: "二级标题" })).toBeInTheDocument();
+    // 正文里的 `#` 会降级成 h2：页面级 H1 由文章页渲染标题，避免一页两个 H1
+    expect(screen.queryByRole("heading", { level: 1 })).not.toBeInTheDocument();
+    expect(
+      screen.getByRole("heading", { level: 2, name: "一级标题" })
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("heading", { level: 2, name: "二级标题" })
+    ).toBeInTheDocument();
 
     // 验证列表渲染
     expect(screen.getByText("列表项一")).toBeInTheDocument();
@@ -87,7 +99,9 @@ console.log(a);
 
     // 确保危险脚本不会以 script 标签形式渲染到 DOM 中
     const scripts = document.querySelectorAll("script");
-    const scriptElements = Array.from(scripts).filter(s => s.textContent?.includes("xss"));
+    const scriptElements = Array.from(scripts).filter(s =>
+      s.textContent?.includes("xss")
+    );
     expect(scriptElements.length).toBe(0);
 
     // 验证含有恶意 JS 协议的链接，如果 rehype-raw / 渲染过滤起效，应过滤或不执行
@@ -174,8 +188,15 @@ const [isPending, startTransition] = useTransition();
     render(<Markdown content={complexArticle} />);
 
     // 验证整体标题和文本存在
-    expect(screen.getByRole("heading", { level: 1, name: "React 19 新特性与性能优化" })).toBeInTheDocument();
-    expect(screen.getByRole("heading", { level: 2, name: "1. 新的 Action 机制" })).toBeInTheDocument();
+    expect(
+      screen.getByRole("heading", {
+        level: 2,
+        name: "React 19 新特性与性能优化",
+      })
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("heading", { level: 2, name: "1. 新的 Action 机制" })
+    ).toBeInTheDocument();
 
     // 验证表格的头部和单元格正确渲染
     expect(screen.getByRole("table")).toBeInTheDocument();
@@ -188,5 +209,42 @@ const [isPending, startTransition] = useTransition();
       expect(tsCode).toBeInTheDocument();
       expect(tsCode).toHaveAttribute("data-language", "typescript");
     });
+  });
+
+  // ==========================================
+  // 安全: 正文原始 HTML 的清洗
+  // ==========================================
+  it("安全: 启用 rehype-raw 的同时必须清洗掉脚本、事件处理属性与 javascript: 协议", () => {
+    const malicious = [
+      "正常段落",
+      "",
+      "<script>window.__pwned = true;</script>",
+      "",
+      '<img src="x" onerror="window.__pwned = true" alt="坏图" />',
+      "",
+      '<a href="javascript:window.__pwned=true">点我</a>',
+      "",
+      '<iframe src="https://evil.example.com"></iframe>',
+    ].join("\n");
+
+    const { container } = render(<Markdown content={malicious} />);
+
+    // 正常内容仍然渲染
+    expect(screen.getByText("正常段落")).toBeInTheDocument();
+
+    // script / iframe 标签被整体移除
+    expect(container.querySelector("script")).toBeNull();
+    expect(container.querySelector("iframe")).toBeNull();
+
+    // 事件处理属性被剥离
+    expect(container.innerHTML).not.toContain("onerror");
+
+    // javascript: 协议不会出现在任何链接上
+    const hrefs = Array.from(container.querySelectorAll("a")).map(
+      a => a.getAttribute("href") || ""
+    );
+    expect(hrefs.some(h => h.toLowerCase().startsWith("javascript:"))).toBe(
+      false
+    );
   });
 });

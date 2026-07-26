@@ -16,8 +16,8 @@ function useHeadings(content: string) {
   useEffect(() => {
     // 滚动监听，高亮当前章节
     const observer = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
+      entries => {
+        entries.forEach(entry => {
           if (entry.isIntersecting) {
             setActiveId(entry.target.id);
           }
@@ -29,10 +29,12 @@ function useHeadings(content: string) {
     const updateHeadings = () => {
       // 从页面中提取所有标题
       const elements = Array.from(
-        document.querySelectorAll(".markdown-content h1, .markdown-content h2, .markdown-content h3")
+        document.querySelectorAll(
+          ".markdown-content h1, .markdown-content h2, .markdown-content h3"
+        )
       );
 
-      const items: TocItem[] = elements.map((elem) => ({
+      const items: TocItem[] = elements.map(elem => ({
         id: elem.id || `heading-${Math.random().toString(36).substr(2, 9)}`,
         text: elem.textContent || "",
         level: parseInt(elem.tagName.substring(1)),
@@ -49,7 +51,7 @@ function useHeadings(content: string) {
 
       // 重新绑定滚动高亮监听
       observer.disconnect();
-      elements.forEach((elem) => observer.observe(elem));
+      elements.forEach(elem => observer.observe(elem));
     };
 
     // 初次提取
@@ -104,7 +106,7 @@ export function TableOfContents({ content }: { content: string }) {
           目录
         </h4>
         <ul className="space-y-2 text-sm">
-          {headings.map((heading) => (
+          {headings.map(heading => (
             <li
               key={heading.id}
               className={cn(
@@ -112,7 +114,9 @@ export function TableOfContents({ content }: { content: string }) {
                 heading.level === 1 && "font-semibold",
                 heading.level === 2 && "pl-0",
                 heading.level === 3 && "pl-4",
-                activeId === heading.id ? "text-primary font-medium" : "text-muted-foreground"
+                activeId === heading.id
+                  ? "text-primary font-medium"
+                  : "text-muted-foreground"
               )}
               onClick={() => scrollToHeading(heading.id)}
             >
@@ -180,7 +184,7 @@ export function MobileTableOfContents({ content }: { content: string }) {
         {/* 目录列表 */}
         <nav className="overflow-y-auto max-h-[calc(70vh-60px)] p-4">
           <ul className="space-y-3">
-            {headings.map((heading) => (
+            {headings.map(heading => (
               <li
                 key={heading.id}
                 className={cn(
@@ -188,7 +192,9 @@ export function MobileTableOfContents({ content }: { content: string }) {
                   heading.level === 1 && "font-semibold text-base",
                   heading.level === 2 && "pl-0 text-sm",
                   heading.level === 3 && "pl-4 text-sm",
-                  activeId === heading.id ? "text-primary font-medium" : "text-muted-foreground"
+                  activeId === heading.id
+                    ? "text-primary font-medium"
+                    : "text-muted-foreground"
                 )}
                 onClick={() => {
                   scrollToHeading(heading.id);
@@ -234,7 +240,9 @@ export function BackToTop() {
       onClick={scrollToTop}
       className={cn(
         "fixed bottom-8 right-8 z-40 p-3 rounded-full bg-primary text-primary-foreground shadow-lg transition-all duration-300 hover:bg-primary/90 hover:scale-110",
-        isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-10 pointer-events-none"
+        isVisible
+          ? "opacity-100 translate-y-0"
+          : "opacity-0 translate-y-10 pointer-events-none"
       )}
       aria-label="回到顶部"
     >

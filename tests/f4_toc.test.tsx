@@ -4,7 +4,13 @@ import React, { useState, useEffect } from "react";
 import { TableOfContents } from "@/components/TableOfContents";
 
 // 编写一个简单的容器来模拟页面上有 Markdown 渲染和 ToC 组件挂载
-function TestArticleWrapper({ content, slug }: { content: string; slug: string }) {
+function TestArticleWrapper({
+  content,
+  slug,
+}: {
+  content: string;
+  slug: string;
+}) {
   // 模拟文章内容的 HTML 渲染
   // 在实际项目中，是通过 Markdown 组件渲染的，在这里我们直接渲染 HTML，以便 useHeadings 能够查找到 .markdown-content 元素
   const [htmlContent, setHtmlContent] = useState("");
@@ -57,11 +63,16 @@ describe("F4: 文章页 ToC 目录自动生成、滚动高亮定位与文章跳�
   // ==========================================
   it("Tier 1: ToC 应该能够正确扫描 DOM 中的 H1-H3 标题并渲染成列表，且点击锚点触发 scrollTo", async () => {
     // 渲染带有标题的文章
-    const { container } = render(<TestArticleWrapper content="# 标题一 \n ## 标题二 \n ### 标题三" slug="article-1" />);
+    render(
+      <TestArticleWrapper
+        content="# 标题一 \n ## 标题二 \n ### 标题三"
+        slug="article-1"
+      />
+    );
 
     // 模拟等待异步渲染完毕
     await act(async () => {
-      await new Promise((resolve) => setTimeout(resolve, 20));
+      await new Promise(resolve => setTimeout(resolve, 20));
     });
 
     // 检查 ToC 是否渲染出了所有的标题 text
@@ -83,10 +94,12 @@ describe("F4: 文章页 ToC 目录自动生成、滚动高亮定位与文章跳�
   // Tier 2: 边界与极限 (Edge Cases & Boundaries)
   // ==========================================
   it("Tier 2: 当正文无任何 Heading 标题时，ToC 应该返回 null 不占位", async () => {
-    render(<TestArticleWrapper content="纯文本，不包含标题" slug="article-empty" />);
+    render(
+      <TestArticleWrapper content="纯文本，不包含标题" slug="article-empty" />
+    );
 
     await act(async () => {
-      await new Promise((resolve) => setTimeout(resolve, 20));
+      await new Promise(resolve => setTimeout(resolve, 20));
     });
 
     // 验证 ToC 没有渲染任何 listitem
@@ -103,7 +116,7 @@ describe("F4: 文章页 ToC 目录自动生成、滚动高亮定位与文章跳�
     );
 
     await act(async () => {
-      await new Promise((resolve) => setTimeout(resolve, 20));
+      await new Promise(resolve => setTimeout(resolve, 20));
     });
 
     expect(screen.getAllByText("标题一")[0]).toBeInTheDocument();
@@ -112,7 +125,7 @@ describe("F4: 文章页 ToC 目录自动生成、滚动高亮定位与文章跳�
     rerender(<TestArticleWrapper content="# 新标题" slug="article-2" />);
 
     await act(async () => {
-      await new Promise((resolve) => setTimeout(resolve, 20));
+      await new Promise(resolve => setTimeout(resolve, 20));
     });
 
     // 验证旧标题消失，新标题出现在目录中
@@ -131,7 +144,7 @@ describe("F4: 文章页 ToC 目录自动生成、滚动高亮定位与文章跳�
 
     // 2. 等待内容装载
     await act(async () => {
-      await new Promise((resolve) => setTimeout(resolve, 20));
+      await new Promise(resolve => setTimeout(resolve, 20));
     });
 
     const items = screen.getAllByRole("listitem");
@@ -140,7 +153,6 @@ describe("F4: 文章页 ToC 目录自动生成、滚动高亮定位与文章跳�
     // 3. 模拟 IntersectionObserver 的触发，模拟滚动高亮标题二
     // 在真实场景中，IntersectionObserverCallback 触发时会 setActiveId。
     // 在我们的测试里，可以通过获取 Mock 实例并执行回调来仿真滚动高亮。
-    const mockObserverInstance = (window.IntersectionObserver as any).mock.instances[0];
     const callback = (window.IntersectionObserver as any).mock.calls[0][0];
 
     act(() => {
@@ -160,7 +172,7 @@ describe("F4: 文章页 ToC 目录自动生成、滚动高亮定位与文章跳�
     rerender(<TestArticleWrapper content="# 新标题" slug="article-2" />);
 
     await act(async () => {
-      await new Promise((resolve) => setTimeout(resolve, 20));
+      await new Promise(resolve => setTimeout(resolve, 20));
     });
 
     // 6. 验证新 ToC 成功刷新为新文章的标题

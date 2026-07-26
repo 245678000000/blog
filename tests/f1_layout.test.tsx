@@ -145,14 +145,14 @@ describe("F1: 现代极简主义设计系统与响应式布局表现", () => {
     // 在移动端下找到菜单展开/折叠按钮（汉堡按钮）
     // 菜单切换按钮通常包含 Menu/X 图标。我们通过 aria-label 或图标名称查找，这里在测试中我们可以直接点击菜单按钮
     // 寻找移动端菜单开关
-    const menuToggle = screen.getByTestId("mobile-menu-toggle"); 
-    
+    const menuToggle = screen.getByTestId("mobile-menu-toggle");
+
     await act(async () => {
       fireEvent.click(menuToggle);
     });
 
     // 验证主题切换按钮在移动端点击时起效
-    const themeButton = screen.getAllByTestId("theme-toggle")[0]; 
+    const themeButton = screen.getAllByTestId("theme-toggle")[0];
     await act(async () => {
       fireEvent.click(themeButton);
     });

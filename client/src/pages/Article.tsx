@@ -1,19 +1,31 @@
 import { Badge } from "@/components/ui/badge";
 import { Markdown } from "@/components/Markdown";
 import { SEO } from "@/components/SEO";
-import { TableOfContents, MobileTableOfContents, BackToTop } from "@/components/TableOfContents";
+import {
+  TableOfContents,
+  MobileTableOfContents,
+  BackToTop,
+} from "@/components/TableOfContents";
 import { ReadingProgress } from "@/components/ReadingProgress";
 import { ShareButtons } from "@/components/ShareButtons";
 import { Comments } from "@/components/Comments";
 import { Newsletter } from "@/components/Newsletter";
 import { useEffect, useState } from "react";
 import { useParams, Link } from "wouter";
-import { getArticleContent, getAdjacentArticles, getRelatedArticles, type Article } from "@shared/articles";
+import {
+  getArticleContent,
+  getAdjacentArticles,
+  getRelatedArticles,
+  type Article,
+} from "@shared/articles";
 
 export default function ArticlePage() {
   const params = useParams();
   const slug = params.slug || "advent-of-claude-2025"; // 默认文章
-  const [article, setArticle] = useState<{ data: Article; content: string } | null>(null);
+  const [article, setArticle] = useState<{
+    data: Article;
+    content: string;
+  } | null>(null);
   const [adjacentArticles, setAdjacentArticles] = useState<{
     prev: Article | null;
     next: Article | null;
@@ -93,7 +105,9 @@ export default function ArticlePage() {
         <SEO title="文章未找到" description="该文章不存在或尚未发布" />
         <div className="container max-w-3xl py-12 flex flex-col items-center justify-center min-h-[50vh] gap-4">
           <h1 className="text-4xl font-serif font-bold">文章未找到</h1>
-          <p className="text-muted-foreground">抱歉，该文章不存在或尚未发布。</p>
+          <p className="text-muted-foreground">
+            抱歉，该文章不存在或尚未发布。
+          </p>
         </div>
       </>
     );
@@ -118,7 +132,10 @@ export default function ArticlePage() {
           {/* Article Header */}
           <div className="flex flex-col gap-6 text-center md:text-left">
             <div className="flex items-center justify-center md:justify-start gap-4 text-sm text-muted-foreground flex-wrap">
-              <Badge variant="secondary" className="bg-primary/20 text-primary hover:bg-primary/30">
+              <Badge
+                variant="secondary"
+                className="bg-primary/20 text-primary hover:bg-primary/30"
+              >
                 {article.data.category}
               </Badge>
               <span>{article.data.date}</span>
@@ -139,7 +156,7 @@ export default function ArticlePage() {
             {/* 标签 */}
             {article.data.tags && article.data.tags.length > 0 && (
               <div className="flex items-center justify-center md:justify-start gap-2 flex-wrap">
-                {article.data.tags.map((tag) => (
+                {article.data.tags.map(tag => (
                   <a
                     key={tag}
                     href={`/archive?tag=${encodeURIComponent(tag)}`}
@@ -182,7 +199,7 @@ export default function ArticlePage() {
             <div className="mt-8 pt-8 border-t border-border/50">
               <h3 className="text-lg font-serif font-bold mb-4">相关文章</h3>
               <div className="grid gap-3">
-                {relatedArticles.map((related) => (
+                {relatedArticles.map(related => (
                   <Link
                     key={related.slug}
                     href={`/article/${related.slug}`}
@@ -192,7 +209,9 @@ export default function ArticlePage() {
                       <p className="font-medium group-hover:text-primary transition-colors line-clamp-1">
                         {related.title}
                       </p>
-                      <p className="text-xs text-muted-foreground">{related.date} · {related.category}</p>
+                      <p className="text-xs text-muted-foreground">
+                        {related.date} · {related.category}
+                      </p>
                     </div>
                   </Link>
                 ))}
@@ -204,13 +223,18 @@ export default function ArticlePage() {
           <Comments />
 
           {/* Article Navigation (Prev/Next) */}
-          <ArticleNavigation prev={adjacentArticles.prev} next={adjacentArticles.next} />
+          <ArticleNavigation
+            prev={adjacentArticles.prev}
+            next={adjacentArticles.next}
+          />
 
           {/* RSS 提醒 */}
           <div className="mt-8 text-center text-sm text-muted-foreground">
             喜欢这篇文章？{" "}
-            <a href="/rss.xml" className="text-primary hover:underline">订阅 RSS</a>
-            {" "}获取最新更新。
+            <a href="/rss.xml" className="text-primary hover:underline">
+              订阅 RSS
+            </a>{" "}
+            获取最新更新。
           </div>
 
           {/* Newsletter */}
@@ -251,8 +275,18 @@ function ArticleNavigation({
             className="group flex flex-col gap-2 p-4 rounded-lg border border-border/50 hover:border-primary/50 hover:bg-secondary/30 transition-all"
           >
             <span className="text-xs text-muted-foreground uppercase tracking-wide flex items-center gap-1">
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+              <svg
+                className="w-4 h-4"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M15 19l-7-7 7-7"
+                />
               </svg>
               上一篇
             </span>
@@ -271,8 +305,18 @@ function ArticleNavigation({
           >
             <span className="text-xs text-muted-foreground uppercase tracking-wide flex items-center justify-end gap-1">
               下一篇
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+              <svg
+                className="w-4 h-4"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M9 5l7 7-7 7"
+                />
               </svg>
             </span>
             <span className="font-serif font-medium group-hover:text-primary transition-colors line-clamp-2">

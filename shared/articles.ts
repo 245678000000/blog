@@ -1,8 +1,11 @@
-// 文章配置列表
-// 添加新文章时，只需：
-// 1. 在 articles/ 目录创建 .md 文件（带 frontmatter）
-// 2. 运行构建脚本更新 articles.json
-// 3. 将 .md 文件复制到 client/public/articles/
+// 文章数据访问层。
+// 新增文章的流程：在 articles/ 目录创建 .md（带 frontmatter），
+// 然后运行 `npm run sync`，脚本会同步到 client/public/articles/ 并重建 articles.json。
+
+import { calculateReadTime } from "./read-time.js";
+
+// 自动计算阅读时间（实现见 shared/read-time.js，与构建脚本共用一份）
+export { calculateReadTime };
 
 export interface Article {
   slug: string;
@@ -14,22 +17,6 @@ export interface Article {
   image: string;
   published: boolean;
   tags?: string[]; // 文章标签
-}
-
-// 自动计算阅读时间
-// 中文: ~300 字/分钟, 英文: ~200 词/分钟
-export function calculateReadTime(content: string): string {
-  // 统计中文字符
-  const chineseChars = (content.match(/[\u4e00-\u9fa5]/g) || []).length;
-  // 统计英文单词（移除中文后按空格分割）
-  const englishText = content.replace(/[\u4e00-\u9fa5]/g, " ");
-  const words = englishText.split(/\s+/).filter(w => w.length > 0).length;
-
-  // 计算分钟数
-  const minutes = Math.ceil(chineseChars / 300 + words / 200);
-
-  // 至少 1 分钟
-  return `${Math.max(1, minutes)} 分钟`;
 }
 
 export interface ArticleWithContent extends Article {
@@ -55,7 +42,8 @@ export function parseArticleFrontmatter(markdown: string): {
         title: "未命名文章",
         date: new Date().toISOString().split("T")[0],
         category: "未分类",
-        readTime: "5 分钟",
+        // 留空，交给调用方按正文长度计算，见 getArticleContent
+        readTime: "",
         description: "",
         image: "",
         published: true,
@@ -73,7 +61,8 @@ export function parseArticleFrontmatter(markdown: string): {
     title: "未命名文章",
     date: new Date().toISOString().split("T")[0],
     category: "未分类",
-    readTime: "5 分钟",
+    // 留空，交给调用方按正文长度计算，见 getArticleContent
+    readTime: "",
     description: "",
     image: "",
     published: true,

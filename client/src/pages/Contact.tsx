@@ -1,6 +1,12 @@
 import { SEO } from "@/components/SEO";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
@@ -74,7 +80,7 @@ export default function Contact() {
     setIsSubmitting(true);
 
     // 模拟提交（实际项目中可以对接邮件服务）
-    await new Promise((resolve) => setTimeout(resolve, 10));
+    await new Promise(resolve => setTimeout(resolve, 10));
 
     // 使用 mailto 链接打开邮件客户端
     const mailtoLink = `mailto:xingpeng278@aliyun.com?subject=${encodeURIComponent(
@@ -86,7 +92,9 @@ export default function Contact() {
     // 打开邮件客户端
     window.location.href = mailtoLink;
 
-    toast.success("正在打开邮件客户端，如未弹出请手动发送邮件至 xingpeng278@aliyun.com");
+    toast.success(
+      "正在打开邮件客户端，如未弹出请手动发送邮件至 xingpeng278@aliyun.com"
+    );
     setIsSubmitting(false);
 
     // 清空表单
@@ -95,17 +103,16 @@ export default function Contact() {
 
   return (
     <>
-      <SEO
-        title="联系我"
-        description="有问题或想法？随时联系我！"
-      />
+      <SEO title="联系我" description="有问题或想法？随时联系我！" />
 
       <div className="container max-w-4xl py-12 animate-in fade-in duration-700">
         {/* 页面标题 */}
         <div className="flex flex-col gap-4 mb-12">
           <div className="flex items-center gap-4">
             <div className="h-[1px] w-12 bg-primary"></div>
-            <span className="text-sm font-mono tracking-widest uppercase text-primary">Contact</span>
+            <span className="text-sm font-mono tracking-widest uppercase text-primary">
+              Contact
+            </span>
           </div>
           <h1 className="text-4xl md:text-5xl font-serif font-bold">联系我</h1>
           <p className="text-lg text-muted-foreground max-w-2xl">
@@ -121,9 +128,7 @@ export default function Contact() {
                 <MessageSquare className="w-5 h-5 text-primary" />
                 发送消息
               </CardTitle>
-              <CardDescription>
-                填写下方表单，我会尽快回复你
-              </CardDescription>
+              <CardDescription>填写下方表单，我会尽快回复你</CardDescription>
             </CardHeader>
             <CardContent>
               <form onSubmit={handleSubmit} className="space-y-4" noValidate>
@@ -134,7 +139,9 @@ export default function Contact() {
                       id="name"
                       placeholder="你的姓名"
                       value={formData.name}
-                      onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                      onChange={e =>
+                        setFormData({ ...formData, name: e.target.value })
+                      }
                       required
                     />
                   </div>
@@ -145,7 +152,9 @@ export default function Contact() {
                       type="email"
                       placeholder="your@email.com"
                       value={formData.email}
-                      onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                      onChange={e =>
+                        setFormData({ ...formData, email: e.target.value })
+                      }
                       required
                     />
                   </div>
@@ -157,7 +166,9 @@ export default function Contact() {
                     id="subject"
                     placeholder="消息主题（可选）"
                     value={formData.subject}
-                    onChange={(e) => setFormData({ ...formData, subject: e.target.value })}
+                    onChange={e =>
+                      setFormData({ ...formData, subject: e.target.value })
+                    }
                   />
                 </div>
 
@@ -168,7 +179,9 @@ export default function Contact() {
                     placeholder="写下你想说的..."
                     rows={5}
                     value={formData.message}
-                    onChange={(e) => setFormData({ ...formData, message: e.target.value })}
+                    onChange={e =>
+                      setFormData({ ...formData, message: e.target.value })
+                    }
                     required
                   />
                 </div>
@@ -199,9 +212,13 @@ export default function Contact() {
                   onClick={handleCopyEmail}
                 >
                   {copied ? (
-                    <><Check className="w-4 h-4 mr-2 text-green-500" /> 已复制</>
+                    <>
+                      <Check className="w-4 h-4 mr-2 text-green-500" /> 已复制
+                    </>
                   ) : (
-                    <><Copy className="w-4 h-4 mr-2" /> xingpeng278@aliyun.com</>
+                    <>
+                      <Copy className="w-4 h-4 mr-2" /> xingpeng278@aliyun.com
+                    </>
                   )}
                 </Button>
               </form>
@@ -216,12 +233,18 @@ export default function Contact() {
                 <CardTitle className="text-lg">其他联系方式</CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
-                {socialLinks.map((link) => (
+                {socialLinks.map(link => (
                   <a
                     key={link.name}
                     href={link.href}
-                    target={link.href.startsWith("mailto") ? undefined : "_blank"}
-                    rel={link.href.startsWith("mailto") ? undefined : "noopener noreferrer"}
+                    target={
+                      link.href.startsWith("mailto") ? undefined : "_blank"
+                    }
+                    rel={
+                      link.href.startsWith("mailto")
+                        ? undefined
+                        : "noopener noreferrer"
+                    }
                     className="flex items-start gap-4 p-3 rounded-lg hover:bg-primary/5 transition-colors group"
                   >
                     <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center group-hover:bg-primary/20 transition-colors">
@@ -231,8 +254,12 @@ export default function Contact() {
                       <div className="font-medium group-hover:text-primary transition-colors">
                         {link.name}
                       </div>
-                      <div className="text-sm text-muted-foreground">{link.label}</div>
-                      <div className="text-xs text-muted-foreground/70">{link.description}</div>
+                      <div className="text-sm text-muted-foreground">
+                        {link.label}
+                      </div>
+                      <div className="text-xs text-muted-foreground/70">
+                        {link.description}
+                      </div>
                     </div>
                   </a>
                 ))}
@@ -253,7 +280,9 @@ export default function Contact() {
                   <Clock className="w-5 h-5 text-primary mt-0.5" />
                   <div>
                     <div className="font-medium">回复时间</div>
-                    <div className="text-sm text-muted-foreground">通常在 24-48 小时内回复</div>
+                    <div className="text-sm text-muted-foreground">
+                      通常在 24-48 小时内回复
+                    </div>
                   </div>
                 </div>
               </CardContent>

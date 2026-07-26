@@ -54,7 +54,10 @@ export default function NotFound() {
         {/* 搜索提示 */}
         <div className="pt-8 border-t border-border/50">
           <p className="text-sm text-muted-foreground">
-            按 <kbd className="px-2 py-1 bg-secondary rounded text-xs">Ctrl</kbd> + <kbd className="px-2 py-1 bg-secondary rounded text-xs">K</kbd> 打开搜索
+            按{" "}
+            <kbd className="px-2 py-1 bg-secondary rounded text-xs">Ctrl</kbd> +{" "}
+            <kbd className="px-2 py-1 bg-secondary rounded text-xs">K</kbd>{" "}
+            打开搜索
           </p>
         </div>
       </div>

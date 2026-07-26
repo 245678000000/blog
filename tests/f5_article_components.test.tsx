@@ -1,4 +1,10 @@
-import { render, screen, fireEvent, act, waitFor } from "@testing-library/react";
+import {
+  render,
+  screen,
+  fireEvent,
+  act,
+  waitFor,
+} from "@testing-library/react";
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import React from "react";
 import { ReadingProgress } from "@/components/ReadingProgress";
@@ -24,7 +30,7 @@ describe("F5: 文章页组件（阅读进度条、社交分享与 Giscus 评论�
 
   beforeEach(() => {
     vi.clearAllMocks();
-    
+
     // Mock navigator.clipboard
     Object.defineProperty(navigator, "clipboard", {
       value: {
@@ -43,7 +49,9 @@ describe("F5: 文章页组件（阅读进度条、社交分享与 Giscus 评论�
   // ==========================================
   it("Tier 1: 滚动页面时，ReadingProgress 阅读进度条应根据 scroll 位置动态调整宽度", () => {
     const { container } = render(<ReadingProgress />);
-    const progressBar = container.querySelector(".bg-primary");
+    const progressBar = container.querySelector(
+      "[data-testid='reading-progress-bar']"
+    );
     expect(progressBar).toBeInTheDocument();
 
     // 初始状态下进度应为 0%
@@ -80,7 +88,9 @@ describe("F5: 文章页组件（阅读进度条、社交分享与 Giscus 评论�
       </ThemeProvider>
     );
 
-    const script = document.querySelector('script[src="https://giscus.app/client.js"]');
+    const script = document.querySelector(
+      'script[src="https://giscus.app/client.js"]'
+    );
     expect(script).toBeInTheDocument();
     expect(script).toHaveAttribute("data-repo", "245678000000/blog");
   });
@@ -90,7 +100,9 @@ describe("F5: 文章页组件（阅读进度条、社交分享与 Giscus 评论�
   // ==========================================
   it("Tier 2: 进度条在极限值下（如滚动超限或无滚动空间）必须能处理并在 0%-100% 范围内截断", () => {
     const { container } = render(<ReadingProgress />);
-    const progressBar = container.querySelector(".bg-primary");
+    const progressBar = container.querySelector(
+      "[data-testid='reading-progress-bar']"
+    );
 
     // 1. 无滚动空间 (docHeight <= 0)
     Object.defineProperty(document.documentElement, "scrollHeight", {
@@ -137,7 +149,9 @@ describe("F5: 文章页组件（阅读进度条、社交分享与 Giscus 评论�
       </ThemeProvider>
     );
 
-    let script = document.querySelector('script[src="https://giscus.app/client.js"]');
+    const script = document.querySelector(
+      'script[src="https://giscus.app/client.js"]'
+    );
     expect(script).toHaveAttribute("data-theme", "dark_dimmed");
 
     // 模拟存在 Giscus 的 iframe
@@ -213,7 +227,9 @@ describe("F5: 文章页组件（阅读进度条、社交分享与 Giscus 评论�
     );
 
     // 5. 验证评论区 script 依旧在 DOM 中
-    const giscusScript = document.querySelector('script[src="https://giscus.app/client.js"]');
+    const giscusScript = document.querySelector(
+      'script[src="https://giscus.app/client.js"]'
+    );
     expect(giscusScript).toBeInTheDocument();
   });
 });

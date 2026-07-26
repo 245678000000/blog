@@ -59,12 +59,15 @@ export function Newsletter() {
       <p className="text-sm text-muted-foreground mb-6">
         新文章发布时第一时间通知你，不会发送垃圾邮件。
       </p>
-      <form onSubmit={handleSubmit} className="flex flex-col sm:flex-row gap-3 max-w-md mx-auto">
+      <form
+        onSubmit={handleSubmit}
+        className="flex flex-col sm:flex-row gap-3 max-w-md mx-auto"
+      >
         <Input
           type="email"
           placeholder="your@email.com"
           value={email}
-          onChange={(e) => setEmail(e.target.value)}
+          onChange={e => setEmail(e.target.value)}
           className="rounded-full flex-1"
           required
         />

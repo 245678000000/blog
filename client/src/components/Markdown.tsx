@@ -1,6 +1,7 @@
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import rehypeRaw from "rehype-raw";
+import rehypeSanitize, { defaultSchema } from "rehype-sanitize";
 import { lazy, Suspense, useState, useEffect, useCallback } from "react";
 
 // 懒加载代码高亮组件，减少首屏体积
@@ -141,11 +142,27 @@ function ImageLightbox({ src, alt }: { src?: string; alt?: string }) {
 function generateHeadingId(text: string): string {
   return text
     .toLowerCase()
-    .replace(/[^\w\u4e00-\u9fa5\s-]/g, '') // 保留中文、英文、数字、空格、连字符
-    .replace(/\s+/g, '-')                    // 空格转连字符
-    .replace(/-+/g, '-')                     // 合并多个连字符
-    .replace(/^-|-$/g, '');                   // 去除首尾连字符
+    .replace(/[^\w\u4e00-\u9fa5\s-]/g, "") // 保留中文、英文、数字、空格、连字符
+    .replace(/\s+/g, "-") // 空格转连字符
+    .replace(/-+/g, "-") // 合并多个连字符
+    .replace(/^-|-$/g, ""); // 去除首尾连字符
 }
+
+// rehype-raw 会把正文里的原始 HTML 原样放进渲染树，单靠 `script: () => null`
+// 拦不住 onerror / javascript: 之类的注入向量。这里在 raw 之后接一层白名单清洗：
+// 保留 GitHub 风格的常用标签，去掉脚本、事件属性和不安全的协议。
+const sanitizeSchema = {
+  ...defaultSchema,
+  tagNames: [...(defaultSchema.tagNames || []), "details", "summary"],
+  attributes: {
+    ...defaultSchema.attributes,
+    // 代码块高亮依赖 language-* class，必须放行
+    code: [
+      ...(defaultSchema.attributes?.code || []),
+      ["className", /^language-./],
+    ],
+  },
+};
 
 interface MarkdownProps {
   content: string;
@@ -157,9 +174,9 @@ export function Markdown({ content, className = "" }: MarkdownProps) {
     <ReactMarkdown
       className={className}
       remarkPlugins={[remarkGfm]}
-      rehypePlugins={[rehypeRaw]}
+      // 顺序不能反：先把 raw HTML 解析进树，再统一清洗
+      rehypePlugins={[rehypeRaw, [rehypeSanitize, sanitizeSchema]]}
       components={{
-        script: () => null,
         // 代码块高亮 (懒加载)
         code({ className, children, ...props }) {
           const match = /language-(\w+)/.exec(className || "");
@@ -181,16 +198,25 @@ export function Markdown({ content, className = "" }: MarkdownProps) {
         // 标题（自动生成 id 供目录跳转）
         h1: ({ children }) => {
           const text = String(children);
+          // 页面级 H1 已由文章页渲染为文章标题，正文里的 `#` 再输出 h1
+          // 会让每页出现两个 H1，既影响 SEO 也让读屏软件的大纲失真。
+          // 这里降级为 h2，仅保留 h1 的视觉尺寸。
           return (
-            <h1 id={generateHeadingId(text)} className="text-3xl md:text-4xl font-serif font-bold mt-8 mb-4 text-foreground scroll-mt-24">
+            <h2
+              id={generateHeadingId(text)}
+              className="text-3xl md:text-4xl font-serif font-bold mt-8 mb-4 text-foreground scroll-mt-24"
+            >
               {children}
-            </h1>
+            </h2>
           );
         },
         h2: ({ children }) => {
           const text = String(children);
           return (
-            <h2 id={generateHeadingId(text)} className="text-2xl md:text-3xl font-serif font-bold mt-8 mb-4 text-foreground scroll-mt-24">
+            <h2
+              id={generateHeadingId(text)}
+              className="text-2xl md:text-3xl font-serif font-bold mt-8 mb-4 text-foreground scroll-mt-24"
+            >
               {children}
             </h2>
           );
@@ -198,7 +224,10 @@ export function Markdown({ content, className = "" }: MarkdownProps) {
         h3: ({ children }) => {
           const text = String(children);
           return (
-            <h3 id={generateHeadingId(text)} className="text-xl md:text-2xl font-serif font-semibold mt-6 mb-3 text-foreground scroll-mt-24">
+            <h3
+              id={generateHeadingId(text)}
+              className="text-xl md:text-2xl font-serif font-semibold mt-6 mb-3 text-foreground scroll-mt-24"
+            >
               {children}
             </h3>
           );
@@ -206,7 +235,10 @@ export function Markdown({ content, className = "" }: MarkdownProps) {
         h4: ({ children }) => {
           const text = String(children);
           return (
-            <h4 id={generateHeadingId(text)} className="text-lg md:text-xl font-serif font-semibold mt-4 mb-2 text-foreground scroll-mt-24">
+            <h4
+              id={generateHeadingId(text)}
+              className="text-lg md:text-xl font-serif font-semibold mt-4 mb-2 text-foreground scroll-mt-24"
+            >
               {children}
             </h4>
           );
@@ -276,9 +308,7 @@ export function Markdown({ content, className = "" }: MarkdownProps) {
           </td>
         ),
         // 图片 (优化加载 + 点击放大)
-        img: ({ src, alt }) => (
-          <ImageLightbox src={src} alt={alt} />
-        ),
+        img: ({ src, alt }) => <ImageLightbox src={src} alt={alt} />,
         // 强调
         strong: ({ children }) => (
           <strong className="font-semibold text-primary">{children}</strong>

@@ -1,4 +1,10 @@
-import { render, screen, fireEvent, waitFor, act } from "@testing-library/react";
+import {
+  render,
+  screen,
+  fireEvent,
+  waitFor,
+  act,
+} from "@testing-library/react";
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import React from "react";
 import Contact from "@/pages/Contact";
@@ -16,7 +22,9 @@ vi.mock("wouter", () => ({
 
 // Mock SEO
 vi.mock("@/components/SEO", () => ({
-  SEO: ({ title }: { title: string }) => <div data-testid="seo-title">{title}</div>,
+  SEO: ({ title }: { title: string }) => (
+    <div data-testid="seo-title">{title}</div>
+  ),
 }));
 
 // Mock sonner
@@ -41,12 +49,12 @@ describe("F7: 关于我页面排版与联系我 Zod 表单输入验证", () => {
   // ==========================================
   it("Tier 1: About 页面应该正确排版呈现个人简介、履历和技能分类", () => {
     render(<About />);
-    
+
     // 验证关键的关于我文本
     expect(screen.getByText("邢鹏")).toBeInTheDocument();
     expect(screen.getByText(/法学硕士/)).toBeInTheDocument();
     expect(screen.getAllByText(/AI Native/)[0]).toBeInTheDocument();
-    
+
     // 验证技能板块
     expect(screen.getByText("技能栈")).toBeInTheDocument();
   });
@@ -54,7 +62,7 @@ describe("F7: 关于我页面排版与联系我 Zod 表单输入验证", () => {
   // ==========================================
   // 联系我 (Contact) 页面测试
   // ==========================================
-  
+
   // ==========================================
   // Tier 1: 特性覆盖 (Feature Coverage)
   // ==========================================
@@ -67,9 +75,15 @@ describe("F7: 关于我页面排版与联系我 Zod 表单输入验证", () => {
     expect(screen.getByLabelText(/留言 \*/)).toBeInTheDocument();
 
     // 输入合法的值
-    fireEvent.change(screen.getByLabelText(/姓名 \*/), { target: { value: "张三" } });
-    fireEvent.change(screen.getByLabelText(/邮箱 \*/), { target: { value: "zhangsan@example.com" } });
-    fireEvent.change(screen.getByLabelText(/留言 \*/), { target: { value: "你好，这是一条合法的测试留言信息。" } });
+    fireEvent.change(screen.getByLabelText(/姓名 \*/), {
+      target: { value: "张三" },
+    });
+    fireEvent.change(screen.getByLabelText(/邮箱 \*/), {
+      target: { value: "zhangsan@example.com" },
+    });
+    fireEvent.change(screen.getByLabelText(/留言 \*/), {
+      target: { value: "你好，这是一条合法的测试留言信息。" },
+    });
 
     // 点击提交按钮
     const submitBtn = screen.getByRole("button", { name: /发送消息/i });
@@ -101,9 +115,15 @@ describe("F7: 关于我页面排版与联系我 Zod 表单输入验证", () => {
     });
 
     // 2. 输入非法的邮箱格式并填写其他字段
-    fireEvent.change(screen.getByLabelText(/姓名 \*/), { target: { value: "李四" } });
-    fireEvent.change(screen.getByLabelText(/邮箱 \*/), { target: { value: "invalid-email" } });
-    fireEvent.change(screen.getByLabelText(/留言 \*/), { target: { value: "留言留言留言" } });
+    fireEvent.change(screen.getByLabelText(/姓名 \*/), {
+      target: { value: "李四" },
+    });
+    fireEvent.change(screen.getByLabelText(/邮箱 \*/), {
+      target: { value: "invalid-email" },
+    });
+    fireEvent.change(screen.getByLabelText(/留言 \*/), {
+      target: { value: "留言留言留言" },
+    });
 
     await act(async () => {
       fireEvent.submit(submitBtn.closest("form") || submitBtn);
@@ -116,13 +136,19 @@ describe("F7: 关于我页面排版与联系我 Zod 表单输入验证", () => {
   it("Tier 2: 在表单提交过程中，提交按钮应当处于 disabled 状态以防重复点击", async () => {
     render(<Contact />);
 
-    fireEvent.change(screen.getByLabelText(/姓名 \*/), { target: { value: "王五" } });
-    fireEvent.change(screen.getByLabelText(/邮箱 \*/), { target: { value: "wangwu@example.com" } });
-    fireEvent.change(screen.getByLabelText(/留言 \*/), { target: { value: "正常的测试留言信息。" } });
+    fireEvent.change(screen.getByLabelText(/姓名 \*/), {
+      target: { value: "王五" },
+    });
+    fireEvent.change(screen.getByLabelText(/邮箱 \*/), {
+      target: { value: "wangwu@example.com" },
+    });
+    fireEvent.change(screen.getByLabelText(/留言 \*/), {
+      target: { value: "正常的测试留言信息。" },
+    });
 
     const submitBtn = screen.getByRole("button", { name: /发送消息/i });
 
-    // 触发提交但不等待异步 resolve 
+    // 触发提交但不等待异步 resolve
     act(() => {
       fireEvent.submit(submitBtn.closest("form") || submitBtn);
     });
@@ -148,8 +174,12 @@ describe("F7: 关于我页面排版与联系我 Zod 表单输入验证", () => {
 
     // 修正输入
     fireEvent.change(nameInput, { target: { value: "赵六" } });
-    fireEvent.change(screen.getByLabelText(/邮箱 \*/), { target: { value: "zhaoliu@example.com" } });
-    fireEvent.change(screen.getByLabelText(/留言 \*/), { target: { value: "这是另外一条留言。" } });
+    fireEvent.change(screen.getByLabelText(/邮箱 \*/), {
+      target: { value: "zhaoliu@example.com" },
+    });
+    fireEvent.change(screen.getByLabelText(/留言 \*/), {
+      target: { value: "这是另外一条留言。" },
+    });
 
     // 点击提交
     await act(async () => {

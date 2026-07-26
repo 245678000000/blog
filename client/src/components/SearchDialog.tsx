@@ -39,14 +39,14 @@ export function SearchDialog({ open, onOpenChange }: SearchDialogProps) {
 
   // 过滤文章
   const filteredArticles = articles.filter(
-    (article) =>
+    article =>
       article.title.toLowerCase().includes(search.toLowerCase()) ||
       article.description.toLowerCase().includes(search.toLowerCase()) ||
       article.category.toLowerCase().includes(search.toLowerCase())
   );
 
   // 获取所有分类
-  const categories = Array.from(new Set(articles.map((a) => a.category)));
+  const categories = Array.from(new Set(articles.map(a => a.category)));
 
   return (
     <CommandDialog open={open} onOpenChange={onOpenChange}>
@@ -62,7 +62,7 @@ export function SearchDialog({ open, onOpenChange }: SearchDialogProps) {
         {/* 分类结果 */}
         {search === "" && categories.length > 0 && (
           <CommandGroup heading="分类">
-            {categories.map((category) => (
+            {categories.map(category => (
               <CommandItem
                 key={category}
                 className="flex items-center gap-2"
@@ -72,7 +72,7 @@ export function SearchDialog({ open, onOpenChange }: SearchDialogProps) {
               >
                 <span className="flex-1">{category}</span>
                 <span className="text-xs text-muted-foreground">
-                  {articles.filter((a) => a.category === category).length} 篇文章
+                  {articles.filter(a => a.category === category).length} 篇文章
                 </span>
               </CommandItem>
             ))}
@@ -81,7 +81,7 @@ export function SearchDialog({ open, onOpenChange }: SearchDialogProps) {
 
         {/* 文章结果 */}
         <CommandGroup heading={search === "" ? "文章" : "搜索结果"}>
-          {filteredArticles.map((article) => (
+          {filteredArticles.map(article => (
             <Link key={article.slug} href={`/article/${article.slug}`}>
               <CommandItem
                 className="flex flex-col items-start gap-1 py-3"
@@ -89,7 +89,9 @@ export function SearchDialog({ open, onOpenChange }: SearchDialogProps) {
               >
                 <div className="flex items-center gap-2 w-full">
                   <span className="font-medium flex-1">{article.title}</span>
-                  <span className="text-xs text-muted-foreground">{article.category}</span>
+                  <span className="text-xs text-muted-foreground">
+                    {article.category}
+                  </span>
                 </div>
                 {article.description && (
                   <p className="text-xs text-muted-foreground line-clamp-1">

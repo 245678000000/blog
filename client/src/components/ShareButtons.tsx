@@ -9,7 +9,11 @@ interface ShareButtonsProps {
   className?: string;
 }
 
-export function ShareButtons({ title, description, className }: ShareButtonsProps) {
+export function ShareButtons({
+  title,
+  description,
+  className,
+}: ShareButtonsProps) {
   const [copied, setCopied] = useState(false);
   const url = typeof window !== "undefined" ? window.location.href : "";
 
@@ -27,14 +31,18 @@ export function ShareButtons({ title, description, className }: ShareButtonsProp
 
   // 分享到 Twitter/X
   const shareToTwitter = () => {
-    const text = encodeURIComponent(`${title}${description ? ` - ${description}` : ""}`);
+    const text = encodeURIComponent(
+      `${title}${description ? ` - ${description}` : ""}`
+    );
     const shareUrl = `https://twitter.com/intent/tweet?text=${text}&url=${encodeURIComponent(url)}`;
     window.open(shareUrl, "_blank", "noopener,noreferrer");
   };
 
   // 分享到微博
   const shareToWeibo = () => {
-    const text = encodeURIComponent(`${title}${description ? ` - ${description}` : ""}`);
+    const text = encodeURIComponent(
+      `${title}${description ? ` - ${description}` : ""}`
+    );
     const shareUrl = `https://service.weibo.com/share/share.php?title=${text}&url=${encodeURIComponent(url)}`;
     window.open(shareUrl, "_blank", "noopener,noreferrer");
   };
@@ -48,7 +56,7 @@ export function ShareButtons({ title, description, className }: ShareButtonsProp
           text: description,
           url,
         });
-      } catch (err) {
+      } catch {
         // 用户取消分享，不需要处理
       }
     }

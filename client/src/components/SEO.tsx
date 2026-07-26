@@ -1,4 +1,10 @@
 import { useEffect } from "react";
+import {
+  SITE_NAME,
+  SITE_AUTHOR,
+  SITE_DESCRIPTION,
+  DEFAULT_SITE_URL,
+} from "@shared/site";
 
 interface SEOProps {
   title?: string;
@@ -11,10 +17,10 @@ interface SEOProps {
   keywords?: string[];
 }
 
-const siteName = "邢鹏的博客";
-const defaultDescription = "法学硕士 | AI Native 开发者 | Prompt 工程师。用 Code 和 AI 工具解决真实世界问题，擅长将 Idea 快速转化为 Demo。";
+const siteName = SITE_NAME;
+const defaultDescription = SITE_DESCRIPTION;
 // 使用 Vite 环境变量 (需要 VITE_ 前缀)
-const siteUrl = import.meta.env.VITE_SITE_URL || "https://www.tthhhh.ggff.net";
+const siteUrl = import.meta.env.VITE_SITE_URL || DEFAULT_SITE_URL;
 const defaultImage = `${siteUrl}/images/hero-bg.jpg`;
 
 export function SEO({
@@ -24,11 +30,14 @@ export function SEO({
   type = "website",
   publishedTime,
   modifiedTime,
-  author = "邢鹏",
+  author = SITE_AUTHOR,
   keywords = [],
 }: SEOProps) {
   const fullTitle = title ? `${title} - ${siteName}` : siteName;
   const imageUrl = image.startsWith("http") ? image : `${siteUrl}${image}`;
+  // 调用方几乎都传数组字面量，直接放进依赖数组会让 effect 每次渲染都重跑。
+  // 折叠成字符串后依赖才是稳定的。
+  const keywordsKey = keywords.join(", ");
 
   useEffect(() => {
     // 设置页面标题
@@ -36,7 +45,9 @@ export function SEO({
 
     // 更新或创建 meta 标签
     const setMeta = (name: string, content: string) => {
-      let element = document.querySelector(`meta[name="${name}"]`) as HTMLMetaElement;
+      let element = document.querySelector(
+        `meta[name="${name}"]`
+      ) as HTMLMetaElement;
       if (!element) {
         element = document.createElement("meta");
         element.name = name;
@@ -46,7 +57,9 @@ export function SEO({
     };
 
     const setProperty = (property: string, content: string) => {
-      let element = document.querySelector(`meta[property="${property}"]`) as HTMLMetaElement;
+      let element = document.querySelector(
+        `meta[property="${property}"]`
+      ) as HTMLMetaElement;
       if (!element) {
         element = document.createElement("meta");
         element.setAttribute("property", property);
@@ -56,7 +69,9 @@ export function SEO({
     };
 
     const setLink = (rel: string, href: string) => {
-      let element = document.querySelector(`link[rel="${rel}"]`) as HTMLLinkElement;
+      let element = document.querySelector(
+        `link[rel="${rel}"]`
+      ) as HTMLLinkElement;
       if (!element) {
         element = document.createElement("link");
         element.rel = rel;
@@ -67,8 +82,8 @@ export function SEO({
 
     // 基础 meta 标签
     setMeta("description", description);
-    if (keywords.length > 0) {
-      setMeta("keywords", keywords.join(", "));
+    if (keywordsKey) {
+      setMeta("keywords", keywordsKey);
     }
     setMeta("author", author);
 
@@ -130,7 +145,16 @@ export function SEO({
     }
 
     jsonLdElement.textContent = JSON.stringify(structuredData);
-  }, [fullTitle, description, imageUrl, type, publishedTime, modifiedTime, author, keywords]);
+  }, [
+    fullTitle,
+    description,
+    imageUrl,
+    type,
+    publishedTime,
+    modifiedTime,
+    author,
+    keywordsKey,
+  ]);
 
   return null; // 这个组件不渲染任何内容
 }

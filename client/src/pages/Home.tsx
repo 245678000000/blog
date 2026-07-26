@@ -1,5 +1,11 @@
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { ArrowRight, Mail } from "lucide-react";
 import { Link } from "wouter";
@@ -22,14 +28,20 @@ export default function Home() {
   }, []);
 
   // 获取所有分类
-  const categories = ["全部", ...Array.from(new Set(articles.map((a) => a.category)))];
-
-  // 根据分类过滤文章
-  const filteredArticles = selectedCategory === "全部"
-    ? articles
-    : articles.filter((a) => a.category === selectedCategory);
+  const categories = [
+    "全部",
+    ...Array.from(new Set(articles.map(a => a.category))),
+  ];
 
   const featuredArticle = articles[0]; // 第一篇作为精选文章（不受筛选影响）
+
+  // 根据分类过滤文章。精选文章已在上方单独展示，这里排除掉避免重复出现。
+  const filteredArticles = articles.filter(
+    a =>
+      a.slug !== featuredArticle?.slug &&
+      (selectedCategory === "全部" || a.category === selectedCategory)
+  );
+
   const displayArticles = filteredArticles.slice(0, 3); // 显示最近 3 篇
 
   return (
@@ -57,23 +69,43 @@ export default function Home() {
           <div className="container relative z-10 flex flex-col items-start gap-8 max-w-4xl animate-in fade-in-up duration-1000">
             <div className="flex items-center gap-4">
               <div className="h-[1px] w-12 bg-primary"></div>
-              <span className="text-sm font-mono tracking-widest uppercase text-primary">Xing Peng</span>
+              <span className="text-sm font-mono tracking-widest uppercase text-primary">
+                Xing Peng
+              </span>
             </div>
 
             <h1 className="text-5xl md:text-7xl font-serif font-bold leading-tight">
-              <span className="animate-line block" style={{ animationDelay: '0.2s' }}>用 Code 和 AI</span>
-              <span className="animate-line block text-primary italic" style={{ animationDelay: '0.5s' }}>解决问题</span>
-              <span className="animate-line block" style={{ animationDelay: '0.8s' }}>拒绝空谈。</span>
+              <span
+                className="animate-line block"
+                style={{ animationDelay: "0.2s" }}
+              >
+                用 Code 和 AI
+              </span>
+              <span
+                className="animate-line block text-primary italic"
+                style={{ animationDelay: "0.5s" }}
+              >
+                解决问题
+              </span>
+              <span
+                className="animate-line block"
+                style={{ animationDelay: "0.8s" }}
+              >
+                拒绝空谈。
+              </span>
             </h1>
 
             <p className="text-xl md:text-2xl text-muted-foreground max-w-2xl leading-relaxed">
-              法学硕士 | AI Native 开发者 | Prompt 工程师。
-              擅长将 Idea 快速转化为 Demo，用结构化思维解决复杂逻辑场景。
+              法学硕士 | AI Native 开发者 | Prompt 工程师。 擅长将 Idea
+              快速转化为 Demo，用结构化思维解决复杂逻辑场景。
             </p>
 
             <div className="flex flex-wrap gap-4 mt-4">
               <Link href={`/article/${featuredArticle?.slug || ""}`}>
-                <Button size="lg" className="text-lg px-8 py-6 rounded-full bg-primary text-primary-foreground hover:bg-primary/90 transition-all hover:scale-105">
+                <Button
+                  size="lg"
+                  className="text-lg px-8 py-6 rounded-full bg-primary text-primary-foreground hover:bg-primary/90 transition-all hover:scale-105"
+                >
                   阅读我的文章 <ArrowRight className="ml-2 h-5 w-5" />
                 </Button>
               </Link>
@@ -81,7 +113,11 @@ export default function Home() {
                 variant="outline"
                 size="lg"
                 className="text-lg px-8 py-6 rounded-full border-primary/50 text-foreground hover:bg-primary/10 hover:border-primary transition-all"
-                onClick={() => document.getElementById('about')?.scrollIntoView({ behavior: 'smooth' })}
+                onClick={() =>
+                  document
+                    .getElementById("about")
+                    ?.scrollIntoView({ behavior: "smooth" })
+                }
               >
                 关于我
               </Button>
@@ -93,10 +129,17 @@ export default function Home() {
         {featuredArticle && (
           <section
             ref={featuredRef}
-            className={cn("container transition-all duration-700", featuredVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8")}
+            className={cn(
+              "container transition-all duration-700",
+              featuredVisible
+                ? "opacity-100 translate-y-0"
+                : "opacity-0 translate-y-8"
+            )}
           >
             <div className="flex items-center gap-4 mb-12">
-              <span className="text-sm font-mono tracking-widest uppercase text-primary">精选文章</span>
+              <span className="text-sm font-mono tracking-widest uppercase text-primary">
+                精选文章
+              </span>
               <div className="h-[1px] flex-1 bg-border"></div>
             </div>
 
@@ -113,7 +156,10 @@ export default function Home() {
 
                 <div className="flex flex-col gap-6">
                   <div className="flex items-center gap-4 text-sm text-muted-foreground">
-                    <Badge variant="secondary" className="bg-primary/20 text-primary hover:bg-primary/30">
+                    <Badge
+                      variant="secondary"
+                      className="bg-primary/20 text-primary hover:bg-primary/30"
+                    >
                       {featuredArticle.category}
                     </Badge>
                     <span>{featuredArticle.date}</span>
@@ -142,24 +188,34 @@ export default function Home() {
         {displayArticles.length > 0 && (
           <section
             ref={writingRef}
-            className={cn("container transition-all duration-700", writingVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8")}
+            className={cn(
+              "container transition-all duration-700",
+              writingVisible
+                ? "opacity-100 translate-y-0"
+                : "opacity-0 translate-y-8"
+            )}
           >
             <div className="flex flex-col md:flex-row md:items-end justify-between mb-12 gap-6">
               <div>
-                <span className="text-sm font-mono tracking-widest uppercase text-primary block mb-4">写作</span>
+                <span className="text-sm font-mono tracking-widest uppercase text-primary block mb-4">
+                  写作
+                </span>
                 <h2 className="text-4xl font-serif font-bold">最近文章</h2>
               </div>
 
               {/* 分类筛选按钮 */}
               <div className="flex flex-wrap gap-2">
-                {categories.map((category) => (
+                {categories.map(category => (
                   <Button
                     key={category}
-                    variant={selectedCategory === category ? "secondary" : "ghost"}
+                    variant={
+                      selectedCategory === category ? "secondary" : "ghost"
+                    }
                     size="sm"
-                    className={selectedCategory === category
-                      ? "rounded-full bg-primary text-primary-foreground hover:bg-primary/90"
-                      : "rounded-full hover:bg-secondary"
+                    className={
+                      selectedCategory === category
+                        ? "rounded-full bg-primary text-primary-foreground hover:bg-primary/90"
+                        : "rounded-full hover:bg-secondary"
                     }
                     onClick={() => setSelectedCategory(category)}
                   >
@@ -171,7 +227,7 @@ export default function Home() {
 
             {displayArticles.length > 0 ? (
               <div className="grid md:grid-cols-3 gap-8">
-                {displayArticles.map((article) => (
+                {displayArticles.map(article => (
                   <Link key={article.slug} href={`/article/${article.slug}`}>
                     <Card className="bg-card/50 border-border/50 hover:border-primary/50 transition-all hover:-translate-y-1 hover:shadow-lg group h-full cursor-pointer overflow-hidden">
                       {article.image && (
@@ -186,7 +242,9 @@ export default function Home() {
                       )}
                       <CardHeader>
                         <div className="flex items-center gap-2 text-xs text-muted-foreground mb-2">
-                          <span className="text-primary font-medium">{article.category}</span>
+                          <span className="text-primary font-medium">
+                            {article.category}
+                          </span>
                           <span>·</span>
                           <span>{article.date}</span>
                         </div>
@@ -217,7 +275,10 @@ export default function Home() {
             {/* 查看更多 */}
             <div className="flex justify-center mt-12">
               <Link href="/archive">
-                <Button variant="outline" className="rounded-full px-8 py-6 text-base hover:text-primary hover:border-primary transition-all">
+                <Button
+                  variant="outline"
+                  className="rounded-full px-8 py-6 text-base hover:text-primary hover:border-primary transition-all"
+                >
                   查看更多文章 <ArrowRight className="ml-2 h-4 w-4" />
                 </Button>
               </Link>
@@ -229,25 +290,43 @@ export default function Home() {
         <section
           id="about"
           ref={aboutRef}
-          className={cn("container bg-secondary/30 rounded-3xl p-8 md:p-16 relative overflow-hidden transition-all duration-700", aboutVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8")}
+          className={cn(
+            "container bg-secondary/30 rounded-3xl p-8 md:p-16 relative overflow-hidden transition-all duration-700",
+            aboutVisible
+              ? "opacity-100 translate-y-0"
+              : "opacity-0 translate-y-8"
+          )}
         >
           <div className="absolute top-0 right-0 w-64 h-64 bg-primary/5 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2"></div>
 
           <div className="grid md:grid-cols-2 gap-12 items-center relative z-10">
             <div className="order-2 md:order-1">
-              <span className="text-sm font-mono tracking-widest uppercase text-primary block mb-4">关于我</span>
-              <h2 className="text-4xl font-serif font-bold mb-6">你好，我是邢鹏</h2>
+              <span className="text-sm font-mono tracking-widest uppercase text-primary block mb-4">
+                关于我
+              </span>
+              <h2 className="text-4xl font-serif font-bold mb-6">
+                你好，我是邢鹏
+              </h2>
 
               <div className="flex flex-wrap gap-2 mb-6">
-                <Badge className="bg-primary/20 text-primary border-0">法学硕士</Badge>
-                <Badge className="bg-primary/20 text-primary border-0">AI Native</Badge>
-                <Badge className="bg-primary/20 text-primary border-0">SkillsHub</Badge>
-                <Badge className="bg-primary/20 text-primary border-0">RAG / Harness</Badge>
+                <Badge className="bg-primary/20 text-primary border-0">
+                  法学硕士
+                </Badge>
+                <Badge className="bg-primary/20 text-primary border-0">
+                  AI Native
+                </Badge>
+                <Badge className="bg-primary/20 text-primary border-0">
+                  SkillsHub
+                </Badge>
+                <Badge className="bg-primary/20 text-primary border-0">
+                  RAG / Harness
+                </Badge>
               </div>
 
               <div className="space-y-4 text-lg text-muted-foreground leading-relaxed">
                 <p>
-                  上海师范大学法律硕士（国际法方向）在读。把法律方法论拧进 AI 工程：做{" "}
+                  上海师范大学法律硕士（国际法方向）在读。把法律方法论拧进 AI
+                  工程：做{" "}
                   <a
                     href="https://legal-skillshub.vercel.app/"
                     target="_blank"
@@ -256,21 +335,30 @@ export default function Home() {
                   >
                     Legal SkillsHub
                   </a>
-                  ，也落地 <strong className="text-foreground">RAG 知识库</strong>、垂直{" "}
+                  ，也落地{" "}
+                  <strong className="text-foreground">RAG 知识库</strong>、垂直{" "}
                   <strong className="text-foreground">Chatbot</strong> 与{" "}
                   <strong className="text-foreground">Agent Harness</strong>。
                 </p>
                 <p>
-                  擅长 Cursor / Claude 等 AI 原生开发，熟悉检索增强、技能包体系与工作流编排。
-                  法学训练带来的边界意识，让 Agent 不只会生成，还知道何时引用、何时停、何时让人复核。
+                  擅长 Cursor / Claude 等 AI
+                  原生开发，熟悉检索增强、技能包体系与工作流编排。
+                  法学训练带来的边界意识，让 Agent
+                  不只会生成，还知道何时引用、何时停、何时让人复核。
                 </p>
                 <p>
-                  <em className="text-foreground/80">Idea 能快速变成可演示、可复用、可分发的东西。</em>
+                  <em className="text-foreground/80">
+                    Idea 能快速变成可演示、可复用、可分发的东西。
+                  </em>
                 </p>
               </div>
 
               <div className="flex flex-wrap gap-4 mt-8">
-                <Button variant="outline" className="rounded-full hover:text-primary hover:border-primary px-6" asChild>
+                <Button
+                  variant="outline"
+                  className="rounded-full hover:text-primary hover:border-primary px-6"
+                  asChild
+                >
                   <a
                     href="https://legal-skillshub.vercel.app/"
                     target="_blank"
@@ -279,13 +367,20 @@ export default function Home() {
                     SkillsHub
                   </a>
                 </Button>
-                <Button variant="outline" className="rounded-full hover:text-primary hover:border-primary px-6" asChild>
+                <Button
+                  variant="outline"
+                  className="rounded-full hover:text-primary hover:border-primary px-6"
+                  asChild
+                >
                   <a href="mailto:xingpeng278@aliyun.com">
                     <Mail className="mr-2 h-4 w-4" /> 联系我
                   </a>
                 </Button>
                 <Link href="/about">
-                  <Button variant="ghost" className="rounded-full hover:text-primary px-6">
+                  <Button
+                    variant="ghost"
+                    className="rounded-full hover:text-primary px-6"
+                  >
                     了解更多 →
                   </Button>
                 </Link>

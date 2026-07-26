@@ -41,7 +41,10 @@ export function Comments() {
     script.setAttribute("data-reactions-enabled", "1");
     script.setAttribute("data-emit-metadata", "0");
     script.setAttribute("data-input-position", "top");
-    script.setAttribute("data-theme", theme === "dark" ? "dark_dimmed" : "light");
+    script.setAttribute(
+      "data-theme",
+      theme === "dark" ? "dark_dimmed" : "light"
+    );
     script.setAttribute("data-lang", "zh-CN");
     script.crossOrigin = "anonymous";
     script.async = true;
