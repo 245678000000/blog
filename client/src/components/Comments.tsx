@@ -83,14 +83,14 @@ export function Comments() {
   }, [theme]);
 
   return (
-    <div className="mt-12 pt-8 border-t border-border/50">
+    <div className="mt-12 w-full min-w-0 border-t border-border/50 pt-8">
       <h3 className="text-lg font-serif font-bold mb-4">评论</h3>
       <div
         ref={node => {
           containerRef.current = node;
           inViewRef(node);
         }}
-        className="giscus-container min-h-[200px]"
+        className="giscus-container min-h-[200px] w-full min-w-0"
       />
     </div>
   );
