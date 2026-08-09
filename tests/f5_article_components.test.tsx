@@ -10,7 +10,7 @@ import React from "react";
 import { ReadingProgress } from "@/components/ReadingProgress";
 import { ShareButtons } from "@/components/ShareButtons";
 import { Comments } from "@/components/Comments";
-import { ThemeProvider } from "@/contexts/ThemeContext";
+import { ThemeProvider, useTheme } from "@/contexts/ThemeContext";
 import { toast } from "sonner";
 
 // Mock sonner
@@ -24,6 +24,41 @@ vi.mock("sonner", () => ({
 // Mock window.open
 const mockOpen = vi.fn();
 window.open = mockOpen;
+
+// Comments 现在是懒加载的：滚到评论区附近才注入 giscus。
+// tests/setup.ts 里的全局 IntersectionObserver mock 从不触发回调，
+// 直接用会让下面每条断言都变成「测有没有进视口」而不是「注入了什么」。
+// 这里换成 observe 时立刻上报可见。
+function observeAsVisible() {
+  window.IntersectionObserver = vi
+    .fn()
+    .mockImplementation((callback: IntersectionObserverCallback) => {
+      const observer = {
+        observe: () =>
+          callback(
+            [{ isIntersecting: true } as IntersectionObserverEntry],
+            observer as unknown as IntersectionObserver
+          ),
+        unobserve: vi.fn(),
+        disconnect: vi.fn(),
+        root: null,
+        rootMargin: "",
+        thresholds: [],
+        takeRecords: () => [],
+      };
+      return observer;
+    }) as unknown as typeof IntersectionObserver;
+}
+
+// 只用来在测试里触发一次真实的主题切换（而不是重挂 ThemeProvider）
+function ThemeToggle() {
+  const { theme, setTheme } = useTheme();
+  return (
+    <button onClick={() => setTheme(theme === "dark" ? "light" : "dark")}>
+      切换主题
+    </button>
+  );
+}
 
 describe("F5: 文章页组件（阅读进度条、社交分享与 Giscus 评论区占位）", () => {
   const mockWriteText = vi.fn();
@@ -42,6 +77,11 @@ describe("F5: 文章页组件（阅读进度条、社交分享与 Giscus 评论�
 
     // 清理 DOM
     document.documentElement.className = "";
+    // ThemeProvider 初始化时会读 localStorage，不清的话上一条用例设的主题
+    // 会漏进下一条
+    localStorage.clear();
+
+    observeAsVisible();
   });
 
   // ==========================================
@@ -93,6 +133,31 @@ describe("F5: 文章页组件（阅读进度条、社交分享与 Giscus 评论�
     );
     expect(script).toBeInTheDocument();
     expect(script).toHaveAttribute("data-repo", "245678000000/blog");
+  });
+
+  it("Tier 1: 评论区未进入视口时不应加载 giscus（第三方请求要等到用户真的滚到底）", () => {
+    // 覆盖掉 beforeEach 里「立刻可见」的 mock，回到从不触发回调的版本
+    window.IntersectionObserver = vi.fn().mockImplementation(() => ({
+      observe: vi.fn(),
+      unobserve: vi.fn(),
+      disconnect: vi.fn(),
+      root: null,
+      rootMargin: "",
+      thresholds: [],
+      takeRecords: () => [],
+    })) as unknown as typeof IntersectionObserver;
+
+    render(
+      <ThemeProvider>
+        <Comments />
+      </ThemeProvider>
+    );
+
+    // 占位容器要在（否则 observer 没东西可观察，也会撑不出高度造成 CLS）
+    expect(document.querySelector(".giscus-container")).toBeInTheDocument();
+    expect(
+      document.querySelector('script[src="https://giscus.app/client.js"]')
+    ).not.toBeInTheDocument();
   });
 
   // ==========================================
@@ -186,6 +251,30 @@ describe("F5: 文章页组件（阅读进度条、社交分享与 Giscus 评论�
 
     // 清理 iframe
     mockIframe.remove();
+  });
+
+  it("Tier 3: 切换主题不应重建 giscus（重建会让评论列表闪白重载、草稿丢失）", () => {
+    render(
+      <ThemeProvider defaultTheme="dark">
+        <Comments />
+        <ThemeToggle />
+      </ThemeProvider>
+    );
+
+    const before = document.querySelector(
+      'script[src="https://giscus.app/client.js"]'
+    );
+    expect(before).toHaveAttribute("data-theme", "dark_dimmed");
+
+    fireEvent.click(screen.getByText("切换主题"));
+
+    const after = document.querySelectorAll(
+      'script[src="https://giscus.app/client.js"]'
+    );
+    // 同一个节点，且没有被注入第二份——注入 script 的 effect 一旦依赖 theme，
+    // 这里会拿到一个全新的元素
+    expect(after).toHaveLength(1);
+    expect(after[0]).toBe(before);
   });
 
   // ==========================================

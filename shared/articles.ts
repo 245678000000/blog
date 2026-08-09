@@ -17,14 +17,18 @@ export interface Article {
   image: string;
   published: boolean;
   tags?: string[]; // 文章标签
+  updated?: string; // 最后修改日期（可选），用于 sitemap lastmod
 }
 
 export interface ArticleWithContent extends Article {
   content: string;
 }
 
-// 缓存文章数据，避免重复请求
-let articlesCache: Article[] | null = null;
+// 缓存文章数据，避免重复请求。
+// 存的是 Promise 而不是结果：只缓存结果的话，两个调用方在第一次请求返回之前
+// 同时进来，缓存都还是空的，于是各发一次 articles.json。
+// 文章页的 Promise.all([getAdjacentArticles, getRelatedArticles]) 正是这个场景。
+let articlesPromise: Promise<Article[]> | null = null;
 
 // 解析 frontmatter 的文章内容
 export function parseArticleFrontmatter(markdown: string): {
@@ -92,6 +96,9 @@ export function parseArticleFrontmatter(markdown: string): {
       case "date":
         data.date = value;
         break;
+      case "updated":
+        data.updated = value;
+        break;
       case "category":
         data.category = value;
         break;
@@ -156,24 +163,33 @@ export async function getArticleContent(
 }
 
 // 从 articles.json 加载所有文章元数据
-async function loadArticlesFromJson(): Promise<Article[]> {
-  if (articlesCache) {
-    return articlesCache;
+function loadArticlesFromJson(): Promise<Article[]> {
+  if (articlesPromise) {
+    return articlesPromise;
   }
 
-  try {
-    const response = await fetch("/articles/articles.json");
-    if (!response.ok) {
-      console.error("Failed to load articles.json");
+  articlesPromise = (async () => {
+    try {
+      const response = await fetch("/articles/articles.json");
+      if (!response.ok) {
+        console.error("Failed to load articles.json");
+        return [];
+      }
+      return (await response.json()) as Article[];
+    } catch (error) {
+      console.error("Failed to parse articles.json:", error);
       return [];
     }
-    const data = await response.json();
-    articlesCache = data as Article[];
-    return articlesCache;
-  } catch (error) {
-    console.error("Failed to parse articles.json:", error);
-    return [];
-  }
+  })();
+
+  // 失败不缓存：网络抖动导致的一次空列表不该让整站的文章列表永久为空，
+  // 下一次调用应该能重试。
+  return articlesPromise.then(articles => {
+    if (articles.length === 0) {
+      articlesPromise = null;
+    }
+    return articles;
+  });
 }
 
 // 获取所有已发布的文章（元数据）

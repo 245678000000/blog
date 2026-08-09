@@ -47,7 +47,14 @@ export default function ArticlePage() {
       setAdjacentArticles({ prev: null, next: null });
       setRelatedArticles([]);
 
-      const result = await getArticleContent(slug);
+      // 三者互不依赖：正文来自 /articles/<slug>.md，前后篇与相关文章都来自
+      // articles.json（同一个请求，见 loadArticlesFromJson 的 Promise 缓存）。
+      // 串起来写就是两个往返的瀑布，正文拿到之前 articles.json 都不会开始下载。
+      const [result, adjacent, related] = await Promise.all([
+        getArticleContent(slug),
+        getAdjacentArticles(slug),
+        getRelatedArticles(slug, 3),
+      ]);
       if (cancelled) return;
 
       if (!result || !result.published) {
@@ -55,13 +62,6 @@ export default function ArticlePage() {
         setLoading(false);
         return;
       }
-
-      // 相邻文章与相关文章互不依赖，并行取，少一个往返
-      const [adjacent, related] = await Promise.all([
-        getAdjacentArticles(slug),
-        getRelatedArticles(slug, 3),
-      ]);
-      if (cancelled) return;
 
       setArticle({ data: result, content: result.content });
       setAdjacentArticles(adjacent);
@@ -110,7 +110,7 @@ export default function ArticlePage() {
   if (notFound || !article) {
     return (
       <>
-        <SEO title="文章未找到" description="该文章不存在或尚未发布" />
+        <SEO title="文章未找到" description="该文章不存在或尚未发布" noindex />
         <div className="container max-w-3xl py-12 flex flex-col items-center justify-center min-h-[50vh] gap-4">
           <h1 className="text-4xl font-serif font-bold">文章未找到</h1>
           <p className="text-muted-foreground">
@@ -164,14 +164,16 @@ export default function ArticlePage() {
             {/* 标签 */}
             {article.data.tags && article.data.tags.length > 0 && (
               <div className="flex items-center justify-center md:justify-start gap-2 flex-wrap">
+                {/* 用 wouter 的 Link 而不是裸 <a>：站内跳转走裸 <a> 会整页重载，
+                    SPA 的路由、已加载的 chunk 和 articles.json 缓存全部作废 */}
                 {article.data.tags.map(tag => (
-                  <a
+                  <Link
                     key={tag}
                     href={`/archive?tag=${encodeURIComponent(tag)}`}
                     className="text-xs px-2.5 py-1 rounded-full bg-secondary/50 text-muted-foreground hover:bg-primary/20 hover:text-primary transition-colors"
                   >
                     #{tag}
-                  </a>
+                  </Link>
                 ))}
               </div>
             )}
@@ -185,6 +187,8 @@ export default function ArticlePage() {
                 alt={article.data.title}
                 className="w-full h-full object-cover"
                 fetchPriority="high"
+                width={1200}
+                height={675}
               />
             </div>
           )}

@@ -107,14 +107,23 @@ export default function Home() {
             </p>
 
             <div className="flex flex-wrap gap-4 mt-4">
-              <Link href={`/article/${featuredArticle?.slug || ""}`}>
-                <Button
-                  size="lg"
-                  className="text-lg px-8 py-6 rounded-full bg-primary text-primary-foreground hover:bg-primary/90 transition-all hover:scale-105"
+              {/* 没有精选文章时（文章全部未发布、articles.json 加载失败）
+                  原来会拼出 /article/ 这个死链，退回归档页 */}
+              <Button
+                size="lg"
+                className="text-lg px-8 py-6 rounded-full bg-primary text-primary-foreground hover:bg-primary/90 transition-all hover:scale-105"
+                asChild
+              >
+                <Link
+                  href={
+                    featuredArticle
+                      ? `/article/${featuredArticle.slug}`
+                      : "/archive"
+                  }
                 >
                   阅读我的文章 <ArrowRight className="ml-2 h-5 w-5" />
-                </Button>
-              </Link>
+                </Link>
+              </Button>
               <Button
                 variant="outline"
                 size="lg"
@@ -288,14 +297,15 @@ export default function Home() {
 
             {/* 查看更多 */}
             <div className="flex justify-center mt-12">
-              <Link href="/archive">
-                <Button
-                  variant="outline"
-                  className="rounded-full px-8 py-6 text-base hover:text-primary hover:border-primary transition-all"
-                >
+              <Button
+                variant="outline"
+                className="rounded-full px-8 py-6 text-base hover:text-primary hover:border-primary transition-all"
+                asChild
+              >
+                <Link href="/archive">
                   查看更多文章 <ArrowRight className="ml-2 h-4 w-4" />
-                </Button>
-              </Link>
+                </Link>
+              </Button>
             </div>
           </section>
         )}
@@ -391,14 +401,13 @@ export default function Home() {
                     <Mail className="mr-2 h-4 w-4" /> 联系我
                   </a>
                 </Button>
-                <Link href="/about">
-                  <Button
-                    variant="ghost"
-                    className="rounded-full hover:text-primary px-6"
-                  >
-                    了解更多 →
-                  </Button>
-                </Link>
+                <Button
+                  variant="ghost"
+                  className="rounded-full hover:text-primary px-6"
+                  asChild
+                >
+                  <Link href="/about">了解更多 →</Link>
+                </Button>
               </div>
             </div>
 
