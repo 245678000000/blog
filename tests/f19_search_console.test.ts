@@ -15,6 +15,7 @@ const indexHtml = fs.readFileSync(
   path.join(ROOT, "client/index.html"),
   "utf-8"
 );
+const vercelConfig = fs.readFileSync(path.join(ROOT, "vercel.json"), "utf-8");
 
 describe("F19: Search Console 所有权验证", () => {
   it("Tier 1: 首页 head 中保留 Search Console 给出的精确验证标签", () => {
@@ -30,5 +31,15 @@ describe("F19: Search Console 所有权验证", () => {
     const body = indexHtml.match(/<body>([\s\S]*?)<\/body>/i)?.[1] ?? "";
 
     expect(body).not.toContain("google-site-verification");
+  });
+
+  it("Tier 2: 不再保留会被 cleanUrls 重定向的 HTML 文件验证方式", () => {
+    const obsoleteFile = path.join(
+      ROOT,
+      "client/public/googlee6011588b656b26f.html"
+    );
+
+    expect(fs.existsSync(obsoleteFile)).toBe(false);
+    expect(vercelConfig).not.toContain("googlee6011588b656b26f");
   });
 });
