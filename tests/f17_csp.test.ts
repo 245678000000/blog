@@ -44,6 +44,12 @@ describe("F17: CSP 内联脚本哈希", () => {
     expect(getCspDirective(csp, "style-src")).toContain("'unsafe-inline'");
   });
 
+  it("Tier 1: style-src 必须允许 Giscus 加载它注入的主题样式", () => {
+    // giscus client.js 会在页面中注入 https://giscus.app/default.css；
+    // 只放行脚本和 iframe 会让评论区能加载、却被浏览器静默拦掉样式。
+    expect(getCspDirective(csp, "style-src")).toContain("https://giscus.app");
+  });
+
   it("Tier 1: index.html 的标签上不应再有内联事件属性（hash 覆盖不到）", () => {
     // 曾经字体 <link> 上挂着 onload="..."，那种写法要开 'unsafe-hashes' 才行。
     // 先把 <script> 内容剥掉：注释里提到 onload= 不算数
