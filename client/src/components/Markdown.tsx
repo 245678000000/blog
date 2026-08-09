@@ -4,14 +4,53 @@ import rehypeRaw from "rehype-raw";
 import rehypeSanitize, { defaultSchema } from "rehype-sanitize";
 import rehypeSlug from "rehype-slug";
 import { rehypeHeadingIds } from "@/lib/rehype-heading-ids";
-import { lazy, Suspense, useState, useEffect, useCallback } from "react";
+import { lazy, Suspense, useState, useEffect } from "react";
+import {
+  Dialog,
+  DialogContent,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 
-// 懒加载代码高亮组件，减少首屏体积
-const SyntaxHighlighter = lazy(() =>
-  import("react-syntax-highlighter/dist/esm/prism-async-light").then(mod => ({
-    default: mod.default,
-  }))
-) as any;
+// 懒加载代码高亮组件 + 显式注册文章实际用到的语言。
+// 此前用 prism-async-light 会按需动态加载 200+ 语言，产物里有 332 个 JS 分片；
+// 改成 PrismLight + registerLanguage 后只打包下列语言，分片数大幅下降。
+//
+// import 路径必须是字面量：写成模板字符串的话 Vite 会把整个语言目录都打进去，
+// 那就又回到 332 个分片了。
+//
+// 语言名的唯一来源是 @shared/code-languages，validate-article.js 用同一份清单
+// 在构建期拦截未注册的语言（否则 Prism 会静默渲染成无高亮纯文本）。
+// 两边是否一致由 tests/f12_code_languages.test.ts 断言。
+const languageLoaders = {
+  bash: () => import("react-syntax-highlighter/dist/esm/languages/prism/bash"),
+  java: () => import("react-syntax-highlighter/dist/esm/languages/prism/java"),
+  json: () => import("react-syntax-highlighter/dist/esm/languages/prism/json"),
+  markdown: () =>
+    import("react-syntax-highlighter/dist/esm/languages/prism/markdown"),
+  nginx: () =>
+    import("react-syntax-highlighter/dist/esm/languages/prism/nginx"),
+  toml: () => import("react-syntax-highlighter/dist/esm/languages/prism/toml"),
+  typescript: () =>
+    import("react-syntax-highlighter/dist/esm/languages/prism/typescript"),
+  yaml: () => import("react-syntax-highlighter/dist/esm/languages/prism/yaml"),
+};
+
+// 供测试比对，确保与 @shared/code-languages 的 SUPPORTED_CODE_LANGUAGES 不漂移
+export const REGISTERED_LANGUAGES = Object.keys(languageLoaders).sort();
+
+const SyntaxHighlighter = lazy(async () => {
+  const entries = Object.entries(languageLoaders);
+  const [prismLight, ...languages] = await Promise.all([
+    import("react-syntax-highlighter/dist/esm/prism-light"),
+    ...entries.map(([, load]) => load()),
+  ]);
+  const PrismLight = prismLight.default;
+  entries.forEach(([name], i) => {
+    PrismLight.registerLanguage(name, languages[i].default);
+  });
+  return { default: PrismLight };
+}) as any;
 
 // 懒加载主题
 const loadTheme = () =>
@@ -88,55 +127,50 @@ function CodeHighlighter({
   );
 }
 
-// 图片 Lightbox 组件
+// 图片 Lightbox 组件。
+//
+// 用 Radix Dialog 而不是自己糊一个 fixed 遮罩：原来的实现把 onClick 挂在 <img>
+// 上，键盘用户根本打不开；打开后也没有 role="dialog"/aria-modal、没有焦点陷阱、
+// 关闭后焦点不归还。这些 Radix 都自带，自己重写一遍只会漏掉其中几条。
 function ImageLightbox({ src, alt }: { src?: string; alt?: string }) {
-  const [isOpen, setIsOpen] = useState(false);
-
-  const handleClose = useCallback(() => setIsOpen(false), []);
-
-  useEffect(() => {
-    if (!isOpen) return;
-    const handleKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") handleClose();
-    };
-    document.addEventListener("keydown", handleKey);
-    document.body.style.overflow = "hidden";
-    return () => {
-      document.removeEventListener("keydown", handleKey);
-      document.body.style.overflow = "";
-    };
-  }, [isOpen, handleClose]);
-
+  // 不要为了消 CLS 在缩略图的 <img> 上写死 aspect-ratio：<img> 默认
+  // object-fit: fill，强行套一个固定比例会把所有非该比例的插图拉变形。
+  // 正文图片尺寸各不相同，真要消除 CLS 得拿到每张图的实际宽高。
   return (
-    <>
-      <img
-        src={src}
-        alt={alt}
-        className="rounded-lg my-4 max-w-full h-auto cursor-zoom-in transition-opacity hover:opacity-90"
-        loading="lazy"
-        decoding="async"
-        onClick={() => setIsOpen(true)}
-      />
-      {isOpen && (
-        <div
-          className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/80 backdrop-blur-sm p-4 cursor-zoom-out animate-in fade-in duration-200"
-          onClick={handleClose}
+    <Dialog>
+      <DialogTrigger asChild>
+        {/* 触发器是真按钮：键盘可聚焦、回车/空格可激活，读屏软件也会
+            announce 成「按钮」而不是一张点不了的图 */}
+        <button
+          type="button"
+          className="block cursor-zoom-in rounded-lg my-4 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
+          aria-label={alt ? `放大查看：${alt}` : "放大查看图片"}
         >
           <img
             src={src}
             alt={alt}
-            className="max-w-full max-h-[90vh] object-contain rounded-lg shadow-2xl"
+            className="rounded-lg max-w-full h-auto transition-opacity hover:opacity-90"
+            loading="lazy"
+            decoding="async"
           />
-          <button
-            className="absolute top-4 right-4 text-white/80 hover:text-white text-3xl leading-none"
-            onClick={handleClose}
-            aria-label="关闭"
-          >
-            &times;
-          </button>
-        </div>
-      )}
-    </>
+        </button>
+      </DialogTrigger>
+      <DialogContent
+        className="w-auto max-w-[95vw] sm:max-w-[95vw] border-0 bg-transparent p-0 shadow-none"
+        // 弹层里只有一张图，没有需要额外描述的内容。
+        // 显式传 undefined 是 Radix 声明「有意不提供 description」的方式，
+        // 不传的话它会往 console 里刷警告。
+        aria-describedby={undefined}
+      >
+        {/* Radix 要求每个 dialog 有可访问名，视觉上不需要就藏起来 */}
+        <DialogTitle className="sr-only">{alt || "图片预览"}</DialogTitle>
+        <img
+          src={src}
+          alt={alt}
+          className="max-w-full max-h-[85vh] object-contain rounded-lg shadow-2xl"
+        />
+      </DialogContent>
+    </Dialog>
   );
 }
 

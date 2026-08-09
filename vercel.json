@@ -38,7 +38,7 @@
       ]
     },
     {
-      "source": "/(images|og)/(.*)",
+      "source": "/(images|og|icons)/(.*)",
       "headers": [
         {
           "key": "Cache-Control",
@@ -71,7 +71,7 @@
   ],
   "rewrites": [
     {
-      "source": "/((?!api|articles|images|assets|og|rss\\.xml|sitemap\\.xml|robots\\.txt|favicon\\.svg|manifest\\.json|sw\\.js).*)",
+      "source": "/((?!api|articles|images|assets|og|icons|rss\\.xml|sitemap\\.xml|robots\\.txt|favicon\\.svg|manifest\\.json|sw\\.js).*)",
       "destination": "/"
     }
   ]

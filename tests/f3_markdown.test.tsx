@@ -1,21 +1,51 @@
 import { render, screen, waitFor } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import { describe, it, expect, vi } from "vitest";
 import React from "react";
 import { Markdown } from "@/components/Markdown";
 
-// Mock 懒加载的高亮组件
-vi.mock("react-syntax-highlighter/dist/esm/prism-async-light", () => ({
-  default: ({
-    children,
-    language,
-  }: {
-    children: React.ReactNode;
-    language: string;
-  }) => (
-    <pre data-testid="syntax-highlighter" data-language={language}>
-      {children}
-    </pre>
+// Mock 懒加载的高亮组件（PrismLight + 显式语言注册）
+vi.mock("react-syntax-highlighter/dist/esm/prism-light", () => ({
+  default: Object.assign(
+    ({
+      children,
+      language,
+    }: {
+      children: React.ReactNode;
+      language: string;
+    }) => (
+      <pre data-testid="syntax-highlighter" data-language={language}>
+        {children}
+      </pre>
+    ),
+    { registerLanguage: () => {} }
   ),
+}));
+
+// Mock 各语言模块（懒加载时会被 import）
+vi.mock("react-syntax-highlighter/dist/esm/languages/prism/bash", () => ({
+  default: {},
+}));
+vi.mock("react-syntax-highlighter/dist/esm/languages/prism/java", () => ({
+  default: {},
+}));
+vi.mock("react-syntax-highlighter/dist/esm/languages/prism/yaml", () => ({
+  default: {},
+}));
+vi.mock("react-syntax-highlighter/dist/esm/languages/prism/toml", () => ({
+  default: {},
+}));
+vi.mock("react-syntax-highlighter/dist/esm/languages/prism/markdown", () => ({
+  default: {},
+}));
+vi.mock("react-syntax-highlighter/dist/esm/languages/prism/json", () => ({
+  default: {},
+}));
+vi.mock("react-syntax-highlighter/dist/esm/languages/prism/typescript", () => ({
+  default: {},
+}));
+vi.mock("react-syntax-highlighter/dist/esm/languages/prism/nginx", () => ({
+  default: {},
 }));
 
 vi.mock("react-syntax-highlighter/dist/esm/styles/prism", () => ({
@@ -63,6 +93,41 @@ describe("F3: 文章详情页 Markdown 渲染与代码块语法高亮", () => {
     const img = screen.getByRole("img", { name: "图片描述" });
     expect(img).toBeInTheDocument();
     expect(img).toHaveAttribute("src", "/test.jpg");
+  });
+
+  it("Tier 1: 正文图片的放大入口必须是按钮，键盘要能打开 Lightbox", async () => {
+    const user = userEvent.setup();
+    render(<Markdown content="![山景](/mountain.jpg)" />);
+
+    // 此前是把 onClick 挂在 <img> 上，键盘用户根本打不开
+    const trigger = screen.getByRole("button", { name: "放大查看：山景" });
+    expect(trigger).toBeInTheDocument();
+
+    // 没打开之前不该有 dialog
+    expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
+
+    trigger.focus();
+    await user.keyboard("{Enter}");
+
+    const dialog = await screen.findByRole("dialog");
+    // 有可访问名，读屏软件才知道打开的是什么
+    expect(dialog).toHaveAccessibleName("山景");
+    // 焦点被移进弹层（Radix 的焦点陷阱），而不是留在页面背后
+    expect(dialog.contains(document.activeElement)).toBe(true);
+
+    await user.keyboard("{Escape}");
+    await waitFor(() => {
+      expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
+    });
+    // 关闭后焦点归还给触发它的按钮
+    expect(document.activeElement).toBe(trigger);
+  });
+
+  it("Tier 2: 图片没有 alt 时，放大按钮仍要有可访问名", async () => {
+    render(<Markdown content="![](/decorative.jpg)" />);
+    expect(
+      screen.getByRole("button", { name: "放大查看图片" })
+    ).toBeInTheDocument();
   });
 
   it("Tier 1: 能够正确识别代码语言并使用高亮组件渲染代码块", async () => {

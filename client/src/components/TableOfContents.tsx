@@ -105,21 +105,35 @@ export function TableOfContents({ content }: { content: string }) {
           目录
         </h4>
         <ul className="space-y-2 text-sm">
+          {/* 目录项必须是 <a href="#id"> 而不是带 onClick 的 <li>：
+              后者键盘完全够不着（不可聚焦、回车无反应），读屏软件也只会把它
+              读成一段普通文本，不知道能点。preventDefault 是为了保留带 offset
+              的平滑滚动，语义和键盘可达性由 <a> 提供。 */}
           {headings.map(heading => (
             <li
               key={heading.id}
               className={cn(
-                "cursor-pointer transition-colors hover:text-primary",
-                heading.level === 1 && "font-semibold",
                 heading.level === 2 && "pl-0",
-                heading.level === 3 && "pl-4",
-                activeId === heading.id
-                  ? "text-primary font-medium"
-                  : "text-muted-foreground"
+                heading.level === 3 && "pl-4"
               )}
-              onClick={() => scrollToHeading(heading.id)}
             >
-              {heading.text}
+              <a
+                href={`#${heading.id}`}
+                onClick={e => {
+                  e.preventDefault();
+                  scrollToHeading(heading.id);
+                }}
+                aria-current={activeId === heading.id ? "true" : undefined}
+                className={cn(
+                  "block transition-colors hover:text-primary rounded-sm",
+                  heading.level === 1 && "font-semibold",
+                  activeId === heading.id
+                    ? "text-primary font-medium"
+                    : "text-muted-foreground"
+                )}
+              >
+                {heading.text}
+              </a>
             </li>
           ))}
         </ul>
@@ -132,6 +146,16 @@ export function TableOfContents({ content }: { content: string }) {
 export function MobileTableOfContents({ content }: { content: string }) {
   const { headings, activeId } = useHeadings(content);
   const [isOpen, setIsOpen] = useState(false);
+
+  // 遮住整个视口的抽屉必须能用 Esc 关掉，否则键盘用户只能一路 Tab 去找关闭按钮
+  useEffect(() => {
+    if (!isOpen) return;
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setIsOpen(false);
+    };
+    document.addEventListener("keydown", onKeyDown);
+    return () => document.removeEventListener("keydown", onKeyDown);
+  }, [isOpen]);
 
   if (headings.length === 0) {
     return null;
@@ -151,9 +175,13 @@ export function MobileTableOfContents({ content }: { content: string }) {
         <List className="h-5 w-5" />
       </button>
 
-      {/* 抽屉背景 */}
+      {/* 抽屉背景。用 <button> 而不是带 onClick 的 <div>：
+          「点空白处关闭」对键盘用户来说等于不存在，而且读屏软件不会告诉他
+          这里能点。做成按钮就自带聚焦与回车。 */}
       {isOpen && (
-        <div
+        <button
+          type="button"
+          aria-label="关闭目录"
           className="xl:hidden fixed inset-0 z-50 bg-background/80 backdrop-blur-sm"
           onClick={() => setIsOpen(false)}
         />
@@ -165,6 +193,9 @@ export function MobileTableOfContents({ content }: { content: string }) {
           "xl:hidden fixed bottom-0 left-0 right-0 z-50 bg-background border-t border-border rounded-t-2xl shadow-2xl transition-transform duration-300 ease-out max-h-[70vh] overflow-hidden",
           isOpen ? "translate-y-0" : "translate-y-full"
         )}
+        // 关着的时候是 translate 到屏幕外而不是卸载，不设 inert 的话
+        // Tab 会走进一堆看不见的链接里
+        inert={!isOpen}
       >
         {/* 抽屉头部 */}
         <div className="flex items-center justify-between p-4 border-b border-border/50">
@@ -187,20 +218,28 @@ export function MobileTableOfContents({ content }: { content: string }) {
               <li
                 key={heading.id}
                 className={cn(
-                  "cursor-pointer transition-colors hover:text-primary py-1",
-                  heading.level === 1 && "font-semibold text-base",
-                  heading.level === 2 && "pl-0 text-sm",
-                  heading.level === 3 && "pl-4 text-sm",
-                  activeId === heading.id
-                    ? "text-primary font-medium"
-                    : "text-muted-foreground"
+                  heading.level === 2 && "pl-0",
+                  heading.level === 3 && "pl-4"
                 )}
-                onClick={() => {
-                  scrollToHeading(heading.id);
-                  setIsOpen(false);
-                }}
               >
-                {heading.text}
+                <a
+                  href={`#${heading.id}`}
+                  onClick={e => {
+                    e.preventDefault();
+                    scrollToHeading(heading.id);
+                    setIsOpen(false);
+                  }}
+                  aria-current={activeId === heading.id ? "true" : undefined}
+                  className={cn(
+                    "block transition-colors hover:text-primary py-1 rounded-sm",
+                    heading.level === 1 ? "font-semibold text-base" : "text-sm",
+                    activeId === heading.id
+                      ? "text-primary font-medium"
+                      : "text-muted-foreground"
+                  )}
+                >
+                  {heading.text}
+                </a>
               </li>
             ))}
           </ul>

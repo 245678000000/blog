@@ -90,8 +90,11 @@
     <!-- Favicon -->
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
 
-    <!-- PWA Manifest -->
+    <!-- PWA。位图图标由 scripts/generate-icons.js 从 favicon.svg 构建期生成，
+         所以 npm run dev 下这几个路径是 404（只影响本地装 PWA）。
+         iOS 完全不看 manifest，只认下面这行 apple-touch-icon。 -->
     <link rel="manifest" href="/manifest.json" />
+    <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png" />
     <meta name="theme-color" content="#1a2420" />
 
     <!-- RSS Feed -->

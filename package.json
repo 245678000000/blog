@@ -5,7 +5,7 @@
   "license": "MIT",
   "scripts": {
     "dev": "npm run sync && vite --host",
-    "build": "npm run sync && vite build && node scripts/optimize-images.js && node scripts/generate-feeds.js && node scripts/generate-og.js && node scripts/prerender.js && node scripts/check-csp.js",
+    "build": "npm run sync && vite build && node scripts/optimize-images.js && node scripts/generate-feeds.js && node scripts/generate-og.js && node scripts/generate-icons.js && node scripts/prerender.js && node scripts/check-csp.js",
     "sync": "node scripts/sync-articles.js",
     "preview": "vite preview --host",
     "check": "tsc --noEmit",
@@ -55,6 +55,7 @@
     "@vitejs/plugin-react": "^5.0.4",
     "autoprefixer": "^10.4.20",
     "eslint": "^9.39.5",
+    "eslint-plugin-jsx-a11y": "^6.10.2",
     "eslint-plugin-react-hooks": "^5.2.0",
     "eslint-plugin-react-refresh": "^0.4.26",
     "globals": "^15.15.0",

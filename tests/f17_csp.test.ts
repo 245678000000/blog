@@ -128,7 +128,7 @@ describe("F17b: Cache-Control 分档", () => {
   });
 
   it("路径不带哈希的资源不能 immutable，否则换图后老访客永远看不到新的", () => {
-    for (const source of ["/(images|og)/(.*)", "/articles/(.*)"]) {
+    for (const source of ["/(images|og|icons)/(.*)", "/articles/(.*)"]) {
       const value = cacheControlFor(source);
       expect(value).toBeDefined();
       expect(value).not.toContain("immutable");

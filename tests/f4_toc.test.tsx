@@ -83,8 +83,14 @@ describe("F4: 文章页 ToC 目录自动生成、滚动高亮定位与文章跳�
     expect(tocItems[1]).toHaveTextContent("标题二");
     expect(tocItems[2]).toHaveTextContent("标题三");
 
+    // 目录项是真链接而不是带 onClick 的 <li>：后者键盘完全够不着，
+    // 读屏软件也只会读成普通文本
+    const tocLinks = screen.getAllByRole("link");
+    expect(tocLinks).toHaveLength(3);
+    expect(tocLinks[1]).toHaveAttribute("href", "#biao-ti-er");
+
     // 点击第二个标题锚点
-    fireEvent.click(tocItems[1]);
+    fireEvent.click(tocLinks[1]);
 
     // 验证触发了 window.scrollTo
     expect(window.scrollTo).toHaveBeenCalled();
@@ -164,8 +170,8 @@ describe("F4: 文章页 ToC 目录自动生成、滚动高亮定位与文章跳�
       ]);
     });
 
-    // 4. 点击标题跳转
-    fireEvent.click(items[1]);
+    // 4. 点击标题跳转（点的是 <li> 里的链接）
+    fireEvent.click(screen.getAllByRole("link")[1]);
     expect(window.scrollTo).toHaveBeenCalled();
 
     // 5. 跳转到第二篇文章
