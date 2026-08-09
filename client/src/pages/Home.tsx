@@ -57,11 +57,17 @@ export default function Home() {
         <section className="relative min-h-[80vh] flex items-center justify-center overflow-hidden">
           {/* Background Image with Overlay */}
           <div className="absolute inset-0 z-0">
+            {/* 纯装饰背景：alt 必须留空，否则读屏软件会念一句没有信息量的
+                "Background"。width/height 取源图真实比例（2752×1536），
+                写错的话浏览器按错误比例预留空间，反而制造 CLS。 */}
             <img
               src="/images/hero-bg.jpg"
-              alt="Background"
+              alt=""
+              aria-hidden="true"
               className="w-full h-full object-cover opacity-40"
               fetchPriority="high"
+              width={2752}
+              height={1536}
             />
             <div className="absolute inset-0 bg-gradient-to-b from-background/80 via-background/50 to-background"></div>
           </div>
@@ -150,6 +156,8 @@ export default function Home() {
                     src={featuredArticle.image}
                     alt={featuredArticle.title}
                     className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+                    width={1200}
+                    height={675}
                   />
                   <div className="absolute inset-0 bg-primary/10 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
                 </div>
@@ -241,6 +249,8 @@ export default function Home() {
                             alt={article.title}
                             className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                             loading="lazy"
+                            width={1200}
+                            height={675}
                           />
                         </div>
                       )}
@@ -400,6 +410,8 @@ export default function Home() {
                   src="/images/xingpeng-avatar.jpg"
                   alt="邢鹏"
                   className="absolute inset-8 w-[calc(100%-4rem)] h-[calc(100%-4rem)] rounded-full object-cover border-4 border-background shadow-2xl"
+                  width={320}
+                  height={320}
                 />
               </div>
             </div>

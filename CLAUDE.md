@@ -36,13 +36,37 @@ npm run test:e2e     # Playwright E2E 测试
 - 不要硬编码域名，用 `import.meta.env.VITE_SITE_URL`
 - 不要直接改 `client/public/articles/articles.json`（由 sync 生成）
 - 不要用中文做文章 slug
-- 不要删除 `vercel.json` 中的安全头配置
+- 不要删除 `vercel.json` 中的安全头配置（含 CSP，改第三方依赖时要同步改，见 README）
+- 不要在 `client/public/` 下放 `robots.txt`（由 `generate-feeds.js` 构建期生成）
+- 不要给正文 `<img>` 写死 `aspect-ratio`（默认 `object-fit: fill`，会把插图拉变形）
+
+## 图片
+
+`client/public/images/` 放**源图**，`scripts/optimize-images.js` 在 `vite build`
+之后就地重编码 `dist/public/images/` 里的副本——源文件不动，改动只落在产物。
+文件名不变，所以组件侧引用方式无需改。
+
+- 单张产物超过 **400KB 构建直接失败**。要么把源图裁小，要么在脚本的 `OVERRIDES`
+  里为它单独设 `maxWidth`/`quality`
+- 照片不要存 PNG。PNG 分支只对色块图有效，照片量化后压不动
+  （`2025-cover` 曾是 490KB PNG，转 JPEG 后 122KB）
+- `npm run dev` 下走的是未经处理的源图，判断线上体积要看 `npm run build` 的输出
+
+## 代码块语言白名单
+
+`shared/code-languages.js` 是唯一来源。Prism 只注册了这份清单里的语言，
+遇到未注册的语言**不会报错**，只会静默渲染成无高亮纯文本。
+
+新增语言要改两处：`Markdown.tsx` 的 `languageLoaders`（import 路径必须是字面量，
+写成模板字符串会让 Vite 把整个语言目录都打进去）+ `SUPPORTED_CODE_LANGUAGES`。
+漏改会被 `validate-article.js` 在构建期拦下，一致性由 `tests/f12` 断言。
 
 ## 测试
 
 - 单元测试：`tests/` 目录，Vitest + Testing Library
 - E2E 测试：`e2e/` 目录，Playwright（需先 `npx playwright install`）
 - 新增页面/组件时考虑添加对应测试
+- 仓库必须放在 iCloud 同步目录之外（现为 `~/code/blog`）。放回 `~/Desktop` 会让 `npm test` 与 `npm run lint` 卡死，详见 IMPROVEMENTS.md
 
 ## 项目结构要点
 
