@@ -4,12 +4,13 @@ import { Moon, Sun, Menu, X, Rss, Github, Mail } from "lucide-react";
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { useTheme } from "@/contexts/ThemeContext";
-import { SearchButton } from "@/components/SearchDialog";
+import { SearchButton, SearchDialog } from "@/components/SearchDialog";
 
 export default function Layout({ children }: { children: React.ReactNode }) {
   const [location] = useLocation();
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [isSearchOpen, setIsSearchOpen] = useState(false);
   const { theme, setTheme } = useTheme();
 
   useEffect(() => {
@@ -18,6 +19,20 @@ export default function Layout({ children }: { children: React.ReactNode }) {
     };
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
+
+  // 搜索弹窗与 Cmd+K 由 Layout 独家持有。
+  // 导航栏与移动菜单里各有一个搜索按钮，若让按钮自带弹窗，
+  // 移动菜单展开时会同时存在两份监听和两份状态，按一下快捷键弹出两个对话框。
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if ((e.ctrlKey || e.metaKey) && e.key === "k") {
+        e.preventDefault();
+        setIsSearchOpen(prev => !prev);
+      }
+    };
+    document.addEventListener("keydown", handleKeyDown);
+    return () => document.removeEventListener("keydown", handleKeyDown);
   }, []);
 
   const navLinks = [
@@ -85,7 +100,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
                 </Link>
               )
             )}
-            <SearchButton />
+            <SearchButton onClick={() => setIsSearchOpen(true)} />
             <a
               href="/rss.xml"
               className="text-sm font-medium transition-colors hover:text-primary text-muted-foreground"
@@ -185,11 +200,19 @@ export default function Layout({ children }: { children: React.ReactNode }) {
               )
             )}
             <div className="py-2 px-4">
-              <SearchButton />
+              <SearchButton
+                onClick={() => {
+                  setIsMobileMenuOpen(false);
+                  setIsSearchOpen(true);
+                }}
+              />
             </div>
           </div>
         )}
       </header>
+
+      {/* 全站唯一的搜索弹窗实例 */}
+      <SearchDialog open={isSearchOpen} onOpenChange={setIsSearchOpen} />
 
       <main id="main-content" className="flex-1 pt-24 pb-16">
         {children}

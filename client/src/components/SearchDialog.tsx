@@ -9,44 +9,54 @@ import {
 import { useEffect, useState } from "react";
 import { Search } from "lucide-react";
 import { getPublishedArticles, type Article } from "@shared/articles";
-import { Link } from "wouter";
+import { useLocation } from "wouter";
 
 interface SearchDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
 }
 
+// 一篇文章的全部可搜索文本。
+// 同时用于两处，必须一致：
+//   1. 我们自己的过滤（决定渲染哪些 CommandItem）
+//   2. CommandItem 的 value —— cmdk 会拿它再过滤一遍
+// 只在 1 里加字段而不给 2 的话，新字段命中的结果会被 cmdk 二次过滤掉。
+function searchableText(article: Article): string {
+  return [
+    article.title,
+    article.description,
+    article.category,
+    ...(article.tags ?? []),
+  ]
+    .join(" ")
+    .toLowerCase();
+}
+
 export function SearchDialog({ open, onOpenChange }: SearchDialogProps) {
   const [articles, setArticles] = useState<Article[]>([]);
   const [search, setSearch] = useState("");
+  const [, setLocation] = useLocation();
 
   useEffect(() => {
     getPublishedArticles().then(setArticles);
   }, []);
 
-  // 键盘快捷键 Ctrl+K / Cmd+K
-  useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if ((e.ctrlKey || e.metaKey) && e.key === "k") {
-        e.preventDefault();
-        onOpenChange(!open);
-      }
-    };
-
-    document.addEventListener("keydown", handleKeyDown);
-    return () => document.removeEventListener("keydown", handleKeyDown);
-  }, [open, onOpenChange]);
-
   // 过滤文章
-  const filteredArticles = articles.filter(
-    article =>
-      article.title.toLowerCase().includes(search.toLowerCase()) ||
-      article.description.toLowerCase().includes(search.toLowerCase()) ||
-      article.category.toLowerCase().includes(search.toLowerCase())
+  const filteredArticles = articles.filter(article =>
+    searchableText(article).includes(search.toLowerCase())
   );
 
   // 获取所有分类
   const categories = Array.from(new Set(articles.map(a => a.category)));
+
+  // 跳转必须写在 onSelect 里，不能靠把 CommandItem 包在 <Link> 中让点击冒泡：
+  // cmdk 的回车只调用 onSelect，不会合成 click，那样键盘用户按下回车只会关掉
+  // 弹窗、停在原地。回归测试见 tests/f13_search.test.tsx。
+  const openArticle = (slug: string) => {
+    onOpenChange(false);
+    setSearch("");
+    setLocation(`/article/${slug}`);
+  };
 
   return (
     <CommandDialog open={open} onOpenChange={onOpenChange}>
@@ -82,24 +92,24 @@ export function SearchDialog({ open, onOpenChange }: SearchDialogProps) {
         {/* 文章结果 */}
         <CommandGroup heading={search === "" ? "文章" : "搜索结果"}>
           {filteredArticles.map(article => (
-            <Link key={article.slug} href={`/article/${article.slug}`}>
-              <CommandItem
-                className="flex flex-col items-start gap-1 py-3"
-                onSelect={() => onOpenChange(false)}
-              >
-                <div className="flex items-center gap-2 w-full">
-                  <span className="font-medium flex-1">{article.title}</span>
-                  <span className="text-xs text-muted-foreground">
-                    {article.category}
-                  </span>
-                </div>
-                {article.description && (
-                  <p className="text-xs text-muted-foreground line-clamp-1">
-                    {article.description}
-                  </p>
-                )}
-              </CommandItem>
-            </Link>
+            <CommandItem
+              key={article.slug}
+              value={`${article.slug} ${searchableText(article)}`}
+              className="flex flex-col items-start gap-1 py-3"
+              onSelect={() => openArticle(article.slug)}
+            >
+              <div className="flex items-center gap-2 w-full">
+                <span className="font-medium flex-1">{article.title}</span>
+                <span className="text-xs text-muted-foreground">
+                  {article.category}
+                </span>
+              </div>
+              {article.description && (
+                <p className="text-xs text-muted-foreground line-clamp-1">
+                  {article.description}
+                </p>
+              )}
+            </CommandItem>
           ))}
         </CommandGroup>
       </CommandList>
@@ -107,23 +117,22 @@ export function SearchDialog({ open, onOpenChange }: SearchDialogProps) {
   );
 }
 
-// 搜索按钮组件
-export function SearchButton() {
-  const [open, setOpen] = useState(false);
-
+// 搜索按钮组件。
+// 不自带弹窗：Layout 在桌面导航和移动菜单里各放了一个按钮，
+// 若每个按钮都挂一份 SearchDialog，移动菜单展开时就会存在两套
+// Cmd+K 监听和两份独立状态，按一下快捷键会同时弹出两个对话框。
+// 弹窗与快捷键统一由 Layout 持有。
+export function SearchButton({ onClick }: { onClick: () => void }) {
   return (
-    <>
-      <button
-        onClick={() => setOpen(true)}
-        className="flex items-center gap-2 px-3 py-1.5 text-sm text-muted-foreground bg-secondary/50 hover:bg-secondary rounded-lg transition-colors border border-border/50"
-      >
-        <Search className="w-4 h-4" />
-        <span>搜索...</span>
-        <kbd className="ml-auto text-xs bg-background border border-border/50 rounded px-1.5 py-0.5">
-          ⌘K
-        </kbd>
-      </button>
-      <SearchDialog open={open} onOpenChange={setOpen} />
-    </>
+    <button
+      onClick={onClick}
+      className="flex items-center gap-2 px-3 py-1.5 text-sm text-muted-foreground bg-secondary/50 hover:bg-secondary rounded-lg transition-colors border border-border/50"
+    >
+      <Search className="w-4 h-4" />
+      <span>搜索...</span>
+      <kbd className="ml-auto text-xs bg-background border border-border/50 rounded px-1.5 py-0.5">
+        ⌘K
+      </kbd>
+    </button>
   );
 }

@@ -22,6 +22,7 @@ import {
   Copy,
   Check,
 } from "lucide-react";
+import { isValidEmail } from "@/lib/validation";
 
 // 社交链接
 const socialLinks = [
@@ -57,6 +58,7 @@ export default function Contact() {
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [copied, setCopied] = useState(false);
+  const [emailError, setEmailError] = useState("");
 
   const handleCopyEmail = async () => {
     try {
@@ -76,6 +78,12 @@ export default function Contact() {
       toast.error("请填写所有必填字段");
       return;
     }
+
+    if (!isValidEmail(formData.email)) {
+      setEmailError("请输入有效的邮箱地址");
+      return;
+    }
+    setEmailError("");
 
     setIsSubmitting(true);
 
@@ -152,11 +160,16 @@ export default function Contact() {
                       type="email"
                       placeholder="your@email.com"
                       value={formData.email}
-                      onChange={e =>
-                        setFormData({ ...formData, email: e.target.value })
-                      }
+                      onChange={e => {
+                        setFormData({ ...formData, email: e.target.value });
+                        if (emailError) setEmailError("");
+                      }}
                       required
+                      aria-invalid={!!emailError}
                     />
+                    {emailError && (
+                      <p className="text-sm text-destructive">{emailError}</p>
+                    )}
                   </div>
                 </div>
 
