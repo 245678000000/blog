@@ -52,6 +52,19 @@ npm run test:e2e     # Playwright E2E 测试
   （`2025-cover` 曾是 490KB PNG，转 JPEG 后 122KB）
 - `npm run dev` 下走的是未经处理的源图，判断线上体积要看 `npm run build` 的输出
 
+## 页面清单与 SEO 元数据
+
+- `shared/pages.js` 是非文章页面的唯一来源，`prerender.js`（生成静态 HTML）
+  与 `generate-feeds.js`（sitemap）都从这里读。加页面要**同时**在
+  `App.tsx` 加路由，一致性由 `tests/f16` 断言
+- `shared/page-meta.js` 负责拼 `<head>`：文章页和静态页共用同一条路径。
+  不要再为某类页面单开一套拼装逻辑——此前就是分开写才导致静态页只有
+  title/description、分享卡片全退回首页
+- 预渲染的 JSON-LD 用 `id="structured-data"`，与 `SEO.tsx` 是**同一个节点**。
+  改任何一边的字段都要同步改另一边，否则爬虫执行 JS 前后读到两份不同的数据
+- 同一份内容挂多个路径时用 `SEO` 的 `canonicalPath` 钉住权威地址
+  （`/writings` 与 `/` 就是这么处理的），不要让两个地址各自 canonical
+
 ## 代码块语言白名单
 
 `shared/code-languages.js` 是唯一来源。Prism 只注册了这份清单里的语言，

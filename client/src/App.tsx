@@ -1,7 +1,7 @@
 import { lazy, Suspense } from "react";
 import { Toaster } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
-import { Route, Switch } from "wouter";
+import { Redirect, Route, Switch } from "wouter";
 import ErrorBoundary from "./components/ErrorBoundary";
 import { ThemeProvider } from "./contexts/ThemeContext";
 import { Analytics } from "./components/Analytics";
@@ -35,12 +35,21 @@ function Router() {
       <Suspense fallback={<PageSkeleton />}>
         <Switch>
           <Route path={"/"} component={Home} />
+          {/* 旧地址，仍可能有外链。内容与 / 完全一致，canonical 由 Home
+              统一钉在 /（见 Home 传给 SEO 的 canonicalPath），
+              所以这里保留渲染而不是跳转，不打断已有链接。 */}
           <Route path={"/writings"} component={Home} />
           <Route path={"/archive"} component={Archive} />
           <Route path={"/about"} component={About} />
           <Route path={"/contact"} component={Contact} />
           <Route path={"/article/:slug"} component={Article} />
-          <Route path={"/advent-of-claude-2025"} component={Article} />
+          {/* 旧的单篇文章短地址。这一篇有自己的 /article/<slug>，两个地址
+              并存就是重复内容，且它此前是靠 Article 里 `params.slug || "advent-..."`
+              那个隐式默认值撑着的——任何 slug 缺失的场景都会静默落到这篇。
+              改成跳转，短地址继续可用，但全站只剩一个可索引地址。 */}
+          <Route path={"/advent-of-claude-2025"}>
+            <Redirect to="/article/advent-of-claude-2025" replace />
+          </Route>
           <Route path={"/404"} component={NotFound} />
           <Route component={NotFound} />
         </Switch>

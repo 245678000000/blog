@@ -46,10 +46,13 @@ export default function Home() {
 
   return (
     <>
+      {/* Home 同时响应 / 和 /writings。两边都自我 canonical 就是一对重复内容，
+          canonical 固定钉在 /——/writings 只是个还在被外链引用的旧地址。 */}
       <SEO
         title="首页"
         description="法学硕士 | AI Native 开发者 | Prompt 工程师。用 Code 和 AI 工具解决真实世界问题。"
         image="/images/hero-bg.jpg"
+        canonicalPath="/"
       />
 
       <div className="flex flex-col gap-24 pb-24">

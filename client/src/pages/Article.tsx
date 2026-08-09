@@ -21,7 +21,9 @@ import {
 
 export default function ArticlePage() {
   const params = useParams();
-  const slug = params.slug || "advent-of-claude-2025"; // 默认文章
+  // 不要在这里兜一个默认 slug：那会让所有「slug 缺失」的场景静默渲染成某一篇
+  // 特定文章，而不是暴露成 404。旧的短地址由 App.tsx 显式跳转处理。
+  const slug = params.slug ?? "";
   const [article, setArticle] = useState<{
     data: Article;
     content: string;
@@ -46,6 +48,15 @@ export default function ArticlePage() {
       setArticle(null);
       setAdjacentArticles({ prev: null, next: null });
       setRelatedArticles([]);
+
+      // 空 slug 直接判 404，不要真发请求：dev 服务器对 /articles/.md 会回
+      // index.html 而不是 404，解析出来是一篇没有 frontmatter 的「未命名文章」，
+      // 反而渲染出一个假页面
+      if (!slug) {
+        setNotFound(true);
+        setLoading(false);
+        return;
+      }
 
       // 三者互不依赖：正文来自 /articles/<slug>.md，前后篇与相关文章都来自
       // articles.json（同一个请求，见 loadArticlesFromJson 的 Promise 缓存）。
