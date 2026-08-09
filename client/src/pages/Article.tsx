@@ -58,9 +58,9 @@ export default function ArticlePage() {
         return;
       }
 
-      // 三者互不依赖：正文来自 /articles/<slug>.md，前后篇与相关文章都来自
+      // 三者同时启动：正文来自 /articles/<slug>.md，所有元数据来自
       // articles.json（同一个请求，见 loadArticlesFromJson 的 Promise 缓存）。
-      // 串起来写就是两个往返的瀑布，正文拿到之前 articles.json 都不会开始下载。
+      // 文章页不再单独解析 YAML，避免与列表页显示不一致。
       const [result, adjacent, related] = await Promise.all([
         getArticleContent(slug),
         getAdjacentArticles(slug),

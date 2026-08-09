@@ -84,6 +84,15 @@ function syncArticles() {
       tags: data.tags || [],
     };
 
+    // updated 是可选字段，用于 sitemap lastmod。未提供时不写入，
+    // generate-feeds.js 会自动回退到 date。
+    if (data.updated) {
+      const parsedUpdated = new Date(data.updated);
+      if (!Number.isNaN(parsedUpdated.getTime())) {
+        articleData.updated = parsedUpdated.toISOString().split("T")[0];
+      }
+    }
+
     articles.push(articleData);
 
     // 复制文件到目标目录

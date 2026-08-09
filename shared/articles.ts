@@ -30,109 +30,14 @@ export interface ArticleWithContent extends Article {
 // 文章页的 Promise.all([getAdjacentArticles, getRelatedArticles]) 正是这个场景。
 let articlesPromise: Promise<Article[]> | null = null;
 
-// 解析 frontmatter 的文章内容
-export function parseArticleFrontmatter(markdown: string): {
-  data: Article;
-  content: string;
-} {
-  const frontmatterRegex = /^---\s*\n([\s\S]*?)\n---\s*\n([\s\S]*)$/;
-  const match = markdown.match(frontmatterRegex);
-
-  if (!match) {
-    // 如果没有 frontmatter，返回默认值
-    return {
-      data: {
-        slug: "",
-        title: "未命名文章",
-        date: new Date().toISOString().split("T")[0],
-        category: "未分类",
-        // 留空，交给调用方按正文长度计算，见 getArticleContent
-        readTime: "",
-        description: "",
-        image: "",
-        published: true,
-      },
-      content: markdown,
-    };
-  }
-
-  const frontmatterText = match[1];
-  const content = match[2];
-
-  // 解析 YAML frontmatter
-  const data: Article = {
-    slug: "",
-    title: "未命名文章",
-    date: new Date().toISOString().split("T")[0],
-    category: "未分类",
-    // 留空，交给调用方按正文长度计算，见 getArticleContent
-    readTime: "",
-    description: "",
-    image: "",
-    published: true,
-  };
-
-  // 简单的 YAML 解析器（适用于基本的 key: value 格式）
-  const lines = frontmatterText.split("\n");
-  for (const line of lines) {
-    const colonIndex = line.indexOf(":");
-    if (colonIndex === -1) continue;
-
-    const key = line.slice(0, colonIndex).trim();
-    let value = line.slice(colonIndex + 1).trim();
-
-    // 移除引号
-    if (
-      (value.startsWith('"') && value.endsWith('"')) ||
-      (value.startsWith("'") && value.endsWith("'"))
-    ) {
-      value = value.slice(1, -1);
-    }
-
-    switch (key) {
-      case "title":
-        data.title = value;
-        break;
-      case "date":
-        data.date = value;
-        break;
-      case "updated":
-        data.updated = value;
-        break;
-      case "category":
-        data.category = value;
-        break;
-      case "readTime":
-        data.readTime = value;
-        break;
-      case "description":
-        data.description = value;
-        break;
-      case "image":
-        data.image = value;
-        break;
-      case "published":
-        data.published = value === "true";
-        break;
-      case "tags":
-        // 解析 tags 数组（格式: [tag1, tag2] 或 tag1, tag2）
-        if (value.startsWith("[") && value.endsWith("]")) {
-          data.tags = value
-            .slice(1, -1)
-            .split(",")
-            .map(t => t.trim().replace(/["']/g, ""))
-            .filter(t => t.length > 0);
-        } else {
-          data.tags = value
-            .split(",")
-            .map(t => t.trim())
-            .filter(t => t.length > 0);
-        }
-        break;
-    }
-  }
-
-  return { data, content };
+// 浏览器不再解析 YAML：元数据在构建期由 gray-matter 解析并写入
+// articles.json，文章页、列表页和归档页都必须以它为唯一来源。
+// 这里只负责从 Markdown 响应中去掉 frontmatter，不解释其中的字段。
+function stripArticleFrontmatter(markdown: string): string {
+  return markdown.replace(
+    /^---[^\S\r\n]*(?:\r?\n)[\s\S]*?\r?\n---[^\S\r\n]*(?:\r?\n|$)/,
+    ""
+  );
 }
 
 // 获取文章内容（从 .md 文件）
@@ -140,14 +45,19 @@ export async function getArticleContent(
   slug: string
 ): Promise<ArticleWithContent | null> {
   try {
-    const response = await fetch(`/articles/${slug}.md`);
-    if (!response.ok) {
+    // articles.json 与 Markdown 并行请求。getArticleBySlug 与其他文章数据
+    // 调用共用 Promise 缓存，因此不会为文章页额外发一次 articles.json。
+    const [data, response] = await Promise.all([
+      getArticleBySlug(slug),
+      fetch(`/articles/${slug}.md`),
+    ]);
+    if (!data || !response.ok) {
       return null;
     }
     const markdown = await response.text();
-    const { data, content } = parseArticleFrontmatter(markdown);
+    const content = stripArticleFrontmatter(markdown);
 
-    // 自动计算阅读时间（如果 frontmatter 中没有指定）
+    // sync 脚本会写入 readTime；保留兜底，便于兼容旧的 articles.json。
     const readTime = data.readTime || calculateReadTime(content);
 
     return {

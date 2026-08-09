@@ -1,5 +1,10 @@
 import fs from "fs";
 import path from "path";
+import {
+  SUPPORTED_CODE_LANGUAGES,
+  PLAIN_CODE_LANGUAGES,
+  extractCodeFenceLanguages,
+} from "../shared/code-languages.js";
 
 // 文件名即 slug，也就是线上 URL 的一段。只允许小写字母、数字和单个连字符。
 // iCloud/Dropbox 冲突副本（`xxx 2.md`）、中文文件名、大写都会被这条挡下来。
@@ -41,6 +46,14 @@ export function validateArticle({ file, slug, data, content, publicDir }) {
     }
   }
 
+  // updated 是可选字段，用于 sitemap lastmod。不填则回退到 date。
+  if (data.updated !== undefined && data.updated !== null) {
+    const parsedUpdated = new Date(data.updated);
+    if (Number.isNaN(parsedUpdated.getTime())) {
+      errors.push(`updated 不是合法日期：${JSON.stringify(data.updated)}`);
+    }
+  }
+
   if (data.tags !== undefined) {
     if (
       !Array.isArray(data.tags) ||
@@ -64,6 +77,24 @@ export function validateArticle({ file, slug, data, content, publicDir }) {
   const isPublished = data.published !== false;
   if (isPublished && content.trim() === "") {
     errors.push("已发布文章的正文不能为空");
+  }
+
+  // 代码围栏的语言必须已在 Markdown.tsx 注册。
+  // Prism 遇到未注册语言不会报错，只会静默渲染成无高亮纯文本——
+  // 没有这道校验的话，作者要等文章上线后自己肉眼发现。
+  const allowedLanguages = new Set([
+    ...SUPPORTED_CODE_LANGUAGES,
+    ...PLAIN_CODE_LANGUAGES,
+  ]);
+  for (const language of extractCodeFenceLanguages(content)) {
+    if (!allowedLanguages.has(language)) {
+      errors.push(
+        `代码块语言「${language}」未注册，高亮会静默失效。` +
+          `请在 client/src/components/Markdown.tsx 的 languageLoaders 中加上它，` +
+          `并同步 shared/code-languages.js 的 SUPPORTED_CODE_LANGUAGES；` +
+          `若本就不需要高亮，改用 ${PLAIN_CODE_LANGUAGES.join(" / ")} 之一。`
+      );
+    }
   }
 
   return errors.map(msg => `  [${file}] ${msg}`);
