@@ -7,10 +7,22 @@ import * as articlesModule from "@shared/articles";
 // 当前路由 slug，由每个用例控制
 let currentSlug = "post-a";
 
+// data-wouter 是个标记：只有走 wouter <Link> 的链接才会带上它。
+// 站内跳转如果退回裸 <a>，浏览器会整页重载，SPA 路由、已加载的 chunk
+// 和 articles.json 缓存全部作废——这个标记就是用来把那种回退挡在测试里。
 vi.mock("wouter", () => ({
   useParams: () => ({ slug: currentSlug }),
-  Link: ({ children, href }: { children: React.ReactNode; href: string }) => (
-    <a href={href}>{children}</a>
+  Link: ({
+    children,
+    href,
+    ...props
+  }: {
+    children: React.ReactNode;
+    href: string;
+  }) => (
+    <a href={href} data-wouter="1" {...props}>
+      {children}
+    </a>
   ),
 }));
 
@@ -131,5 +143,46 @@ describe("F9: 文章页加载竞态与状态清理", () => {
     await waitFor(() => {
       expect(screen.getByText("文章未找到")).toBeInTheDocument();
     });
+  });
+
+  it("Tier 1: 标签必须是 wouter 的客户端链接，不能退回裸 <a> 整页刷新", async () => {
+    (articlesModule.getArticleContent as any).mockResolvedValue({
+      slug: "post-a",
+      title: "文章 A",
+      date: "2026-07-01",
+      category: "技术",
+      readTime: "5 分钟",
+      description: "描述",
+      image: "",
+      published: true,
+      tags: ["React", "AI 工具"],
+      content: "正文",
+    });
+
+    render(<ArticlePage />);
+
+    const tag = await screen.findByText("#React");
+    expect(tag).toHaveAttribute("href", "/archive?tag=React");
+    expect(tag).toHaveAttribute("data-wouter", "1");
+
+    // 标签里的空格等字符要转义，否则拼出来的是非法 URL
+    expect(screen.getByText("#AI 工具")).toHaveAttribute(
+      "href",
+      "/archive?tag=AI%20%E5%B7%A5%E5%85%B7"
+    );
+  });
+
+  it("Tier 3: 正文与 articles.json 应并行请求，而不是串成瀑布", async () => {
+    // 正文卡住不返回：如果是串行写法，另外两个请求要等它，一次都不会发出
+    (articlesModule.getArticleContent as any).mockReturnValue(
+      new Promise(() => {})
+    );
+
+    render(<ArticlePage />);
+
+    await waitFor(() => {
+      expect(articlesModule.getAdjacentArticles).toHaveBeenCalledWith("post-a");
+    });
+    expect(articlesModule.getRelatedArticles).toHaveBeenCalledWith("post-a", 3);
   });
 });

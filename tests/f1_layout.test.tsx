@@ -14,9 +14,16 @@ vi.mock("wouter", () => ({
   useLocation: () => ["/", vi.fn()],
 }));
 
-// Mock 搜索按钮组件以免引入复杂的弹窗逻辑
+// Mock 搜索组件以免引入复杂的弹窗逻辑。
+// 弹窗与 Cmd+K 现在由 Layout 持有，所以 SearchDialog 也要一并 mock。
 vi.mock("@/components/SearchDialog", () => ({
-  SearchButton: () => <button data-testid="search-button">搜索</button>,
+  SearchButton: ({ onClick }: { onClick: () => void }) => (
+    <button data-testid="search-button" onClick={onClick}>
+      搜索
+    </button>
+  ),
+  SearchDialog: ({ open }: { open: boolean }) =>
+    open ? <div data-testid="search-dialog" /> : null,
 }));
 
 describe("F1: 现代极简主义设计系统与响应式布局表现", () => {

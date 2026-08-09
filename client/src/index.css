@@ -212,3 +212,17 @@
     }
   }
 }
+
+/* 前庭功能敏感用户兜底：系统开启「减少动态效果」时禁用所有动画与过渡。
+ * 注意：animate-line 与 useInView 的 opacity-0→opacity-100 都依赖动画到达 forwards/visible 态，
+ * 这里把 duration 设为 0.01ms 而非 0，确保动画仍会「完成」到终态，内容不会停在 opacity-0。 */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

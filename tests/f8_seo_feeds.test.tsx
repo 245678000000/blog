@@ -2,7 +2,7 @@ import { render } from "@testing-library/react";
 import { describe, it, expect, beforeEach } from "vitest";
 import React from "react";
 import { SEO } from "@/components/SEO";
-import { DEFAULT_SITE_URL } from "@shared/site";
+import { DEFAULT_SITE_URL, absolutizeLinks } from "@shared/site";
 
 describe("F8: SEO 元数据集成与 RSS/Sitemap 生成", () => {
   beforeEach(() => {
@@ -94,6 +94,18 @@ describe("F8: SEO 元数据集成与 RSS/Sitemap 生成", () => {
     );
   });
 
+  it("Sitemap lastmod 应优先使用 updated 字段，未提供时回退到 date", () => {
+    // 模拟 generate-feeds.js 的 lastmod 选择逻辑
+    const articles = [
+      { slug: "a", date: "2026-07-01", updated: "2026-08-01" },
+      { slug: "b", date: "2026-06-01" }, // 无 updated
+    ];
+
+    const lastmods = articles.map(a => a.updated || a.date);
+    expect(lastmods[0]).toBe("2026-08-01"); // 用 updated
+    expect(lastmods[1]).toBe("2026-06-01"); // 回退到 date
+  });
+
   // ==========================================
   // Tier 2: 边界与极限 (Edge Cases & Boundaries)
   // ==========================================
@@ -175,7 +187,10 @@ describe("F8: SEO 元数据集成与 RSS/Sitemap 生成", () => {
     expect(jsonLdScript).toBeInTheDocument();
     const ldData = JSON.parse(jsonLdScript.textContent || "{}");
     expect(ldData["@type"]).toBe("Article");
-    expect(ldData["name"]).toBe("React 19 教程 - 邢鹏的博客");
+    // Article 用 headline 而不是 name，且是不带站名后缀的纯标题——
+    // 与 shared/page-meta.js 里预渲染的那份保持一致（两者写的是同一个节点）
+    expect(ldData["headline"]).toBe("React 19 教程");
+    expect(ldData["name"]).toBeUndefined();
     expect(ldData["datePublished"]).toBe("2026-07-14");
 
     // 5. 抓取 RSS 并检查文章 URL 是否与 Head 里的 Canonical 同源
@@ -279,5 +294,133 @@ describe("F8: SEO 元数据集成与 RSS/Sitemap 生成", () => {
     expect(canonical.href).toBe(`${DEFAULT_SITE_URL}/archive`);
 
     window.history.replaceState({}, "", "/");
+  });
+
+  it("canonicalPath: 同一份内容挂在多个路径下时，canonical 要钉到权威地址", () => {
+    // Home 同时响应 / 和 /writings，两边都自我 canonical 就是一对重复内容
+    window.history.replaceState({}, "", "/writings");
+
+    render(<SEO title="首页" canonicalPath="/" />);
+
+    const canonical = document.head.querySelector(
+      'link[rel="canonical"]'
+    ) as HTMLLinkElement;
+    const ogUrl = document.head.querySelector(
+      'meta[property="og:url"]'
+    ) as HTMLMetaElement;
+    expect(canonical.href).toBe(`${DEFAULT_SITE_URL}/`);
+    expect(ogUrl.content).toBe(`${DEFAULT_SITE_URL}/`);
+
+    window.history.replaceState({}, "", "/");
+  });
+
+  it("canonicalPath: 不传时仍然自我 canonical，取当前 pathname", () => {
+    window.history.replaceState({}, "", "/about");
+
+    render(<SEO title="关于我" />);
+
+    const canonical = document.head.querySelector(
+      'link[rel="canonical"]'
+    ) as HTMLLinkElement;
+    expect(canonical.href).toBe(`${DEFAULT_SITE_URL}/about`);
+
+    window.history.replaceState({}, "", "/");
+  });
+
+  it("JSON-LD: 首页是 WebSite，内页是 WebPage（与预渲染那份一致）", () => {
+    window.history.replaceState({}, "", "/");
+    const { unmount } = render(<SEO />);
+    expect(
+      JSON.parse(document.getElementById("structured-data")!.textContent!)[
+        "@type"
+      ]
+    ).toBe("WebSite");
+    unmount();
+
+    window.history.replaceState({}, "", "/about");
+    render(<SEO title="关于我" />);
+    const ld = JSON.parse(
+      document.getElementById("structured-data")!.textContent!
+    );
+    expect(ld["@type"]).toBe("WebPage");
+    expect(ld.name).toBe("关于我");
+
+    window.history.replaceState({}, "", "/");
+  });
+
+  // ==========================================
+  // noindex（软 404 防收录）
+  // ==========================================
+  it("noindex: 为 true 时应写入 <meta name='robots' content='noindex'>", () => {
+    render(<SEO title="文章未找到" noindex />);
+
+    const robots = document.head.querySelector(
+      'meta[name="robots"]'
+    ) as HTMLMetaElement;
+    expect(robots).toBeInTheDocument();
+    expect(robots.content).toBe("noindex");
+  });
+
+  it("noindex: 从 noindex 页导航到正常页后，robots 标签必须被移除", () => {
+    // 1. 先渲染一个 noindex 页（如文章未找到）
+    const { rerender } = render(<SEO title="文章未找到" noindex />);
+    expect(
+      document.head.querySelector('meta[name="robots"]')
+    ).toBeInTheDocument();
+
+    // 2. 导航到正常页面（无 noindex）
+    rerender(<SEO title="首页" description="首页描述" />);
+
+    // 3. robots 标签必须被移除，否则正常页会被移出索引——后果比软 404 更严重
+    expect(
+      document.head.querySelector('meta[name="robots"]')
+    ).not.toBeInTheDocument();
+  });
+
+  it("noindex: 正常页面默认不应写入 robots 标签", () => {
+    render(<SEO title="首页" />);
+    expect(
+      document.head.querySelector('meta[name="robots"]')
+    ).not.toBeInTheDocument();
+  });
+});
+
+// RSS 全文（content:encoded）里的链接会在阅读器自己的域名下渲染，
+// 站内相对路径不补全就是死链。目前 articles/ 下没有插图，这条路径在真实数据里
+// 走不到，所以必须靠单测守住——否则第一篇带图的文章上线才会暴露。
+describe("F8b: RSS 全文的站内链接绝对化", () => {
+  const SITE = "https://example.com";
+
+  it("应把 src/href 的站内绝对路径补成完整 URL", () => {
+    const html = '<img src="/images/a.png" /><a href="/article/x">x</a>';
+    expect(absolutizeLinks(html, SITE)).toBe(
+      `<img src="${SITE}/images/a.png" /><a href="${SITE}/article/x">x</a>`
+    );
+  });
+
+  it("不应改动已经是绝对 URL 的链接", () => {
+    const html = '<a href="https://other.com/x">x</a>';
+    expect(absolutizeLinks(html, SITE)).toBe(html);
+  });
+
+  it("不应改动 mailto: 与页内锚点", () => {
+    const html = '<a href="mailto:a@b.com">a</a><a href="#section">b</a>';
+    expect(absolutizeLinks(html, SITE)).toBe(html);
+  });
+
+  it("不应把 //protocol-relative 当成站内路径", () => {
+    const html = '<img src="//cdn.example.org/a.png" />';
+    expect(absolutizeLinks(html, SITE)).toBe(html);
+  });
+
+  it("不应改动正文文字里恰好长得像路径的内容", () => {
+    // 只匹配 属性名="/..."，纯文本里的 /images/a.png 不受影响
+    const html = "<p>把图片放到 /images/a.png 即可</p>";
+    expect(absolutizeLinks(html, SITE)).toBe(html);
+  });
+
+  it("空输入应安全返回空串", () => {
+    expect(absolutizeLinks(undefined, SITE)).toBe("");
+    expect(absolutizeLinks("", SITE)).toBe("");
   });
 });

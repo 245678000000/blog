@@ -11,9 +11,19 @@ import Home from "@/pages/Home";
 import * as articlesModule from "@shared/articles";
 
 // Mock wouter
+// 必须把剩余 props 透传到 <a>：真实的 wouter Link 会转发 className 等属性，
+// 而 `<Button asChild><Link/></Button>` 正是靠 Radix Slot 把 Button 的
+// className 合并到 Link 上。丢掉 props 的 mock 会让这条链路在测试里失真。
 vi.mock("wouter", () => ({
-  Link: ({ children, href }: { children: React.ReactNode; href: string }) => (
-    <a href={href} data-testid={`link-${href}`}>
+  Link: ({
+    children,
+    href,
+    ...props
+  }: {
+    children: React.ReactNode;
+    href: string;
+  }) => (
+    <a href={href} data-testid={`link-${href}`} {...props}>
       {children}
     </a>
   ),
@@ -152,6 +162,27 @@ describe("F2: 首页 Hero 区域、精选卡片与最近文章无刷新分类筛
       // 验证未抛出白屏错误，页面正常呈现
       expect(screen.getByText(/用 Code 和 AI/)).toBeInTheDocument();
     });
+
+    // 没有精选文章时，Hero 的主 CTA 曾经拼出 /article/ 这个死链
+    const cta = screen.getByText(/阅读我的文章/).closest("a");
+    expect(cta).toHaveAttribute("href", "/archive");
+  });
+
+  it("Tier 1: 链接式按钮不能渲染成 <a><button>（非法嵌套，键盘与读屏行为不确定）", async () => {
+    const { container } = render(<Home />);
+
+    await waitFor(() => {
+      expect(screen.getByText(/精选文章/)).toBeInTheDocument();
+    });
+
+    // Button 要用 asChild 把样式交给 <a>，而不是把 <button> 塞进 <a> 里
+    expect(container.querySelectorAll("a button")).toHaveLength(0);
+    expect(container.querySelectorAll("button a")).toHaveLength(0);
+
+    // 同时确认 asChild 之后按钮样式确实落到了链接上（Slot 有没有接上）
+    const moreLink = screen.getByText(/查看更多文章/).closest("a");
+    expect(moreLink).toHaveAttribute("href", "/archive");
+    expect(moreLink?.className).toContain("rounded-full");
   });
 
   it("Tier 2: 当标题极其冗长时，卡片组件应当能安全承载而不断裂或溢出", async () => {

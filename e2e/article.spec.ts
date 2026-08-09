@@ -25,4 +25,24 @@ test.describe("文章页", () => {
     await page.goto("/article/advent-of-claude-2025");
     await expect(page.locator("text=分享：")).toBeVisible();
   });
+
+  test("giscus 要等滚到评论区才加载", async ({ page }) => {
+    // 第三方脚本本身不放出去，只看有没有被注入——e2e 不该依赖 giscus.app 可达
+    await page.route("https://giscus.app/**", route => route.abort());
+
+    await page.goto("/article/advent-of-claude-2025");
+    await page.waitForSelector("article");
+
+    const giscusScript = page.locator(
+      'script[src="https://giscus.app/client.js"]'
+    );
+    const container = page.locator(".giscus-container");
+
+    // 占位容器在，但脚本还没注入
+    await expect(container).toBeAttached();
+    await expect(giscusScript).toHaveCount(0);
+
+    await container.scrollIntoViewIfNeeded();
+    await expect(giscusScript).toHaveCount(1);
+  });
 });

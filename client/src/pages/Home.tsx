@@ -46,10 +46,13 @@ export default function Home() {
 
   return (
     <>
+      {/* Home 同时响应 / 和 /writings。两边都自我 canonical 就是一对重复内容，
+          canonical 固定钉在 /——/writings 只是个还在被外链引用的旧地址。 */}
       <SEO
         title="首页"
         description="法学硕士 | AI Native 开发者 | Prompt 工程师。用 Code 和 AI 工具解决真实世界问题。"
         image="/images/hero-bg.jpg"
+        canonicalPath="/"
       />
 
       <div className="flex flex-col gap-24 pb-24">
@@ -57,11 +60,17 @@ export default function Home() {
         <section className="relative min-h-[80vh] flex items-center justify-center overflow-hidden">
           {/* Background Image with Overlay */}
           <div className="absolute inset-0 z-0">
+            {/* 纯装饰背景：alt 必须留空，否则读屏软件会念一句没有信息量的
+                "Background"。width/height 取源图真实比例（2752×1536），
+                写错的话浏览器按错误比例预留空间，反而制造 CLS。 */}
             <img
               src="/images/hero-bg.jpg"
-              alt="Background"
+              alt=""
+              aria-hidden="true"
               className="w-full h-full object-cover opacity-40"
               fetchPriority="high"
+              width={2752}
+              height={1536}
             />
             <div className="absolute inset-0 bg-gradient-to-b from-background/80 via-background/50 to-background"></div>
           </div>
@@ -101,14 +110,23 @@ export default function Home() {
             </p>
 
             <div className="flex flex-wrap gap-4 mt-4">
-              <Link href={`/article/${featuredArticle?.slug || ""}`}>
-                <Button
-                  size="lg"
-                  className="text-lg px-8 py-6 rounded-full bg-primary text-primary-foreground hover:bg-primary/90 transition-all hover:scale-105"
+              {/* 没有精选文章时（文章全部未发布、articles.json 加载失败）
+                  原来会拼出 /article/ 这个死链，退回归档页 */}
+              <Button
+                size="lg"
+                className="text-lg px-8 py-6 rounded-full bg-primary text-primary-foreground hover:bg-primary/90 transition-all hover:scale-105"
+                asChild
+              >
+                <Link
+                  href={
+                    featuredArticle
+                      ? `/article/${featuredArticle.slug}`
+                      : "/archive"
+                  }
                 >
                   阅读我的文章 <ArrowRight className="ml-2 h-5 w-5" />
-                </Button>
-              </Link>
+                </Link>
+              </Button>
               <Button
                 variant="outline"
                 size="lg"
@@ -150,6 +168,8 @@ export default function Home() {
                     src={featuredArticle.image}
                     alt={featuredArticle.title}
                     className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+                    width={1200}
+                    height={675}
                   />
                   <div className="absolute inset-0 bg-primary/10 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
                 </div>
@@ -241,6 +261,8 @@ export default function Home() {
                             alt={article.title}
                             className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                             loading="lazy"
+                            width={1200}
+                            height={675}
                           />
                         </div>
                       )}
@@ -278,14 +300,15 @@ export default function Home() {
 
             {/* 查看更多 */}
             <div className="flex justify-center mt-12">
-              <Link href="/archive">
-                <Button
-                  variant="outline"
-                  className="rounded-full px-8 py-6 text-base hover:text-primary hover:border-primary transition-all"
-                >
+              <Button
+                variant="outline"
+                className="rounded-full px-8 py-6 text-base hover:text-primary hover:border-primary transition-all"
+                asChild
+              >
+                <Link href="/archive">
                   查看更多文章 <ArrowRight className="ml-2 h-4 w-4" />
-                </Button>
-              </Link>
+                </Link>
+              </Button>
             </div>
           </section>
         )}
@@ -381,14 +404,13 @@ export default function Home() {
                     <Mail className="mr-2 h-4 w-4" /> 联系我
                   </a>
                 </Button>
-                <Link href="/about">
-                  <Button
-                    variant="ghost"
-                    className="rounded-full hover:text-primary px-6"
-                  >
-                    了解更多 →
-                  </Button>
-                </Link>
+                <Button
+                  variant="ghost"
+                  className="rounded-full hover:text-primary px-6"
+                  asChild
+                >
+                  <Link href="/about">了解更多 →</Link>
+                </Button>
               </div>
             </div>
 
@@ -400,6 +422,8 @@ export default function Home() {
                   src="/images/xingpeng-avatar.jpg"
                   alt="邢鹏"
                   className="absolute inset-8 w-[calc(100%-4rem)] h-[calc(100%-4rem)] rounded-full object-cover border-4 border-background shadow-2xl"
+                  width={320}
+                  height={320}
                 />
               </div>
             </div>

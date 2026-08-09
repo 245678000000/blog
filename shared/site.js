@@ -27,3 +27,14 @@ export function escapeXml(str) {
     .replace(/"/g, "&quot;")
     .replace(/'/g, "&apos;");
 }
+
+// 把 HTML 里的站内绝对路径补成完整 URL。
+// RSS 阅读器在自己的域名下渲染 content:encoded，不会按本站解析 /images/xxx，
+// 不处理的话全文里的图片和站内链接到了阅读器里就是死链。
+// 只动以单个 / 开头的 src/href：http(s):、mailto:、#锚点、//protocol-relative 都保持原样。
+export function absolutizeLinks(html, siteUrl) {
+  return String(html ?? "").replace(
+    /\s(src|href)="\/(?!\/)([^"]*)"/g,
+    (_, attr, rest) => ` ${attr}="${siteUrl}/${rest}"`
+  );
+}

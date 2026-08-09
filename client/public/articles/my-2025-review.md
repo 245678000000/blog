@@ -5,7 +5,7 @@ slug: my-2025
 category: 随笔
 readTime: 8 分钟
 description: "2025年的年度总结，关于考研、旅行、迷茫与成长的故事。"
-image: /images/2025-cover.png
+image: /images/2025-cover.jpg
 published: true
 ---
 

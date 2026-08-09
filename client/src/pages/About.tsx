@@ -96,6 +96,14 @@ const projects = [
 // 经历时间线
 const timeline = [
   {
+    year: "2026.07 - 至今",
+    title: "法务实习",
+    organization: "蔚来 (NIO) · 法务部",
+    description:
+      "参与法务部 AI 工具应用与业务流程优化，探索智能体在合同审查、合规风控等场景的落地路径。",
+    icon: Briefcase,
+  },
+  {
     year: "2026",
     title: "Legal SkillsHub 上线",
     organization: "独立构建 · legal-skillshub.vercel.app",
@@ -144,14 +152,6 @@ const timeline = [
     icon: Code,
   },
   {
-    year: "2023.06 - 2023.08",
-    title: "实习律师助理",
-    organization: "绥化正达律师事务所 · 上海",
-    description:
-      "数据清洗、深度检索，将非结构化法律文本转化为可检索、可分析的结构化数据。",
-    icon: Briefcase,
-  },
-  {
     year: "2021.09 - 2025.06",
     title: "法学本科",
     organization: "上海师范大学",
@@ -192,6 +192,8 @@ export default function About() {
                     src="/images/xingpeng-avatar.jpg"
                     alt="邢鹏"
                     className="absolute inset-2 w-[calc(100%-1rem)] h-[calc(100%-1rem)] rounded-full object-cover border-4 border-background shadow-xl"
+                    width={160}
+                    height={160}
                   />
                 </div>
                 <div className="text-center">

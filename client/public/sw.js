@@ -76,17 +76,21 @@ self.addEventListener("fetch", event => {
   // Only handle same-origin GET requests
   if (request.method !== "GET" || url.origin !== location.origin) return;
 
-  // Cache-first: 带内容哈希的构建产物与图片，文件名变了内容才会变
-  if (
-    url.pathname.startsWith("/assets/") ||
-    url.pathname.startsWith("/images/")
-  ) {
+  // Cache-first: 仅限带内容哈希的构建产物。文件名变了内容才会变，
+  // 所以「命中就永不回源」是安全的。
+  if (url.pathname.startsWith("/assets/")) {
     event.respondWith(cacheFirst(request));
     return;
   }
 
-  // Stale-while-revalidate: 文章正文与文章索引，内容会随发布更新
-  if (url.pathname.startsWith("/articles/")) {
+  // Stale-while-revalidate: 内容会原地更新、但文件名不变的资源。
+  // /images/ 不带内容哈希（/images/avatar.jpg 换图后路径照旧），
+  // 用 cache-first 的话老访客除非 CACHE_NAME 变否则永远看不到新图。
+  if (
+    url.pathname.startsWith("/articles/") ||
+    url.pathname.startsWith("/images/") ||
+    url.pathname.startsWith("/icons/")
+  ) {
     event.respondWith(staleWhileRevalidate(request));
     return;
   }

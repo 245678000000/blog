@@ -9,6 +9,10 @@ node_modules
 articles
 client/public/articles
 
+# 机器本地文件：被全局 gitignore 忽略，但 prettier 仍会扫到，
+# 导致本地 format:check 挂在一个根本不该进仓库的文件上
+.claude/settings.local.json
+
 # 生成物与锁文件
 package-lock.json
 client/public/og

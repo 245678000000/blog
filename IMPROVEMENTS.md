@@ -2,6 +2,11 @@
 
 > 本文档面向接手的 AI/开发者。每项都标注了**证据位置**、**期望行为**和**验收方式**。
 > 请逐项处理，不要打包成一个大提交。
+>
+> **2026-08-09 已完成第 1–10 项、第 12–13 项及一批新发现的问题**，详见文末「已完成」。
+> 本文档现在只保留未决项和警告。
+>
+> **仓库路径已变更为 `~/code/blog`**（原 `~/Desktop/blog`，在 iCloud 同步目录下）。
 
 ---
 
@@ -16,7 +21,9 @@
 | 文件名规范   | 文章文件名即 slug，必须匹配 `/^[a-z0-9]+(?:-[a-z0-9]+)*$/`。`scripts/validate-article.js` 会在构建期强制校验                                                                              |
 | 域名         | 不要硬编码。前端用 `import.meta.env.VITE_SITE_URL`，脚本用 `shared/site.js` 的 `resolveSiteUrl()`                                                                                         |
 | 站点常量     | 站名/作者/描述统一在 `shared/site.js`，不要在组件里重复字面量                                                                                                                             |
-| 安全头       | 不要删除 `vercel.json` 里的 `headers` 配置                                                                                                                                                |
+| 代码高亮语言 | 白名单在 `shared/code-languages.js`，是唯一来源。新增语言必须**同时**改 `Markdown.tsx` 的 `languageLoaders` 和这份清单，否则构建失败（或更糟：线上静默无高亮）                            |
+| robots.txt   | 由 `scripts/generate-feeds.js` 构建期生成（Sitemap 指令需要绝对 URL）。**不要**在 `client/public/` 下再放一份静态的                                                                       |
+| 安全头       | 不要删除 `vercel.json` 里的 `headers` 配置。改动第三方依赖时要同步改 CSP，见 README「内容安全策略」一节                                                                                   |
 | 路由         | `vercel.json` 的 `cleanUrls: true` 与 rewrite `destination: "/"` 是配套的。**改任意一个都要在部署后实测** `/writings`、`/article/<不存在的slug>` 是否仍返回 SPA（详见第 11 项的历史教训） |
 
 **提交前必须全绿**（CI 就是这六步，顺序一致）：
@@ -25,231 +32,72 @@
 npm run format:check && npm run lint && npm run check && npm test && npm run build && npm run test:e2e
 ```
 
-当前基线：**84 个单测 + 11 个 e2e 全过，lint 0 error / 11 warning**。不要让基线倒退。
+当前基线：**184 个单测 + 14 个 e2e 全过，lint 0 error / 9 warning，构建产物 25 个 JS 分片**。
+六步跑完约 15 秒。不要让基线倒退。
 
 ---
 
-## P0 — 用户可见的缺陷
+## P1 — 需要在真实环境验证的改动
 
-### 1. 深色模式用户每次加载都会闪一下白屏（FOUC）
+### A. CSP 上线后必须实测一次 ⚠️
 
-**证据**
+`vercel.json` 新增了 `Content-Security-Policy`。白名单只覆盖当前用到的第三方
+（giscus、Google Fonts），详见 README「内容安全策略」一节。
 
-- `client/src/index.css:49` — `:root` 定义的是**亮色**配色
-- `client/src/index.css:97` — 深色配色在 `.dark` 类下
-- `client/src/contexts/ThemeContext.tsx:36-41` — 主题 class 在 `useEffect` 里才加到 `<html>`，即**首次绘制之后**
-- `client/src/App.tsx` — `<ThemeProvider defaultTheme="dark">`
-- `dist/public/index.html` — 产物里 `<html lang="zh-CN">` 上没有任何主题 class
+**CSP 属于「只看配置文件推不出结果」的那一类。** 部署后必须：
 
-**问题**：站点默认深色，但 CSS 默认亮色，class 又要等 React 挂载后才加。结果是**每个深色模式用户在每次硬加载时都会先看到亮色页面再闪成深色**。预渲染上线后首屏更快，这个白闪反而更明显。
+1. 打开站点，DevTools Console 不应出现 `Refused to load` / `Refused to execute`
+2. 文章页滚到底，**评论区（giscus iframe）要能正常加载**
+3. 字体要生效（标题是 Noto Serif SC，不是系统衬线回退）
+4. 手动分享一次，确认 OG 图能抓到
 
-**期望**：首次绘制时 `<html>` 上就带正确的主题 class，无闪烁。
+若之后启用统计（Umami/Plausible/GA）或配置 `VITE_NEWSLETTER_ENDPOINT`，
+**必须同步往 CSP 里加域名**，否则脚本会被浏览器直接拦掉。对照表在 README 里。
 
-**建议做法**：在 `client/index.html` 的 `<head>` 里、**样式表引入之前**插入一段内联脚本（必须是阻塞式，不能 defer）：
+### B. OG 图改成 PNG 后，实际分享要抓一次
 
-```html
-<script>
-  (function () {
-    try {
-      var t = localStorage.getItem("theme");
-      if (t !== "light" && t !== "dark") {
-        t = window.matchMedia("(prefers-color-scheme: light)").matches
-          ? "light"
-          : "dark";
-      }
-      document.documentElement.classList.add(t);
-    } catch (e) {
-      document.documentElement.classList.add("dark");
-    }
-  })();
-</script>
-```
+`scripts/generate-og.js` 现在用 sharp 输出 1200×630 PNG，`prerender.js` 的扩展名
+已同步。构建产物已确认是合法 PNG，但**社交平台的抓取行为只能实测**：
+用 [opengraph.xyz](https://www.opengraph.xyz/) 或直接发微信/Twitter 试一次。
 
-同时 `ThemeContext` 的初始化逻辑要与这段脚本**保持同一套优先级**（localStorage → 系统偏好 → dark），否则两者会打架。
-
-**注意**：`scripts/prerender.js` 会以 `dist/public/index.html` 为模板生成所有静态页，这段脚本会自动带过去，无需额外改动——但要跑一次 `npm run build` 确认产物里确实有。
-
-**验收**
-
-1. 浏览器 devtools 把网络限速到 Slow 3G，硬刷新首页与任意文章页，**不应看到亮色闪烁**
-2. 在浏览器里 `localStorage.setItem('theme','light')` 后刷新，应直接是亮色，同样无闪烁
-3. `npm test` 仍全过（`tests/f1_layout.test.tsx` 有主题相关用例）
+首页默认图现在指向 `/og/default.png`（此前生成了但没有任何地方引用）。
+注意它只存在于**构建产物**里，`npm run dev` 下这个路径是 404——
+只影响 meta 标签，不影响页面渲染。
 
 ---
 
-### 2. 表单邮箱只判断非空/含 @，无效地址可提交
+## P2 — 未完成的改进
 
-**证据**
+### D. 正文图片的 CLS 仍未解决
 
-- `client/src/pages/Contact.tsx:134` — `<form ... noValidate>`，浏览器原生校验被关闭
-- `client/src/pages/Contact.tsx:75` — 只有 `!formData.email` 的非空判断
-- `client/src/components/Newsletter.tsx:16` — 只有 `email.includes("@")`
+`client/src/components/Markdown.tsx` 的正文 `<img>` **有意不设** `aspect-ratio`。
 
-**问题**：`abc`、`a@`、`@b` 都能通过。Contact 表单会据此拼一个 mailto 打开邮件客户端，地址是错的。
+上一轮曾加过 `style={{ aspectRatio: "16 / 9" }}`，但那是错的：`<img>` 默认
+`object-fit: fill`，强行套一个固定比例会把所有非 16:9 的插图**拉变形**。
+已回退。
 
-**期望**：提交前校验邮箱格式，不合法时给出行内错误提示（不只是 toast）。
+目前 `articles/*.md` 里一张图都没有，所以这个问题不紧迫。真要解决，需要拿到
+每张图的实际宽高，例如约定 `![alt](/images/x.png "w=800 h=600")` 再在
+Markdown 组件里解析 title，而不是统一假设一个比例。
 
-**建议做法**：两处共用一个校验函数。项目**没有**装 zod（早前作为未使用依赖移除了），如果要用需重新安装；不想加依赖就用正则：
+**第一篇带插图的文章上线前应该先做这个。**
 
-```ts
-// 建议放 client/src/lib/validation.ts
-export const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-```
+### E. Google Fonts 仍是第三方依赖
 
-**验收**：新增单测覆盖 `abc` / `a@` / `@b.com` / `a@b` 被拒、`a@b.com` 通过；Contact 与 Newsletter 两处都要覆盖。
+`client/index.html` 现在用 `preload` + `onload` 异步加载字体，不再阻塞首屏
+（此前 preload 的 URL 与实际引用的 URL 不一致，preload 永远命中不了，等于白下载一次）。
 
----
+但字体本体仍托管在 `fonts.gstatic.com`，大陆网络下经常超时——异步化只保证了
+**首屏不被拖死**，字体本身该加载不出来还是加载不出来。
 
-## P1 — SEO 与正确性
-
-### 3. OG 分享图是 SVG，主流社交平台不识别
-
-**证据**
-
-- `scripts/generate-og.js:76` — 输出 `${slug}.svg`
-- `scripts/prerender.js` — `og:image` 指向 `/og/${slug}.svg`
-
-**问题**：文件路径是通的（早前修过一次扩展名不匹配导致的 404），但 **Twitter/X、Facebook、微信、Telegram 均不支持 SVG 作为 og:image**，实际分享时会退化成无图或站点默认图。
-
-**期望**：输出 PNG（1200×630）。
-
-**建议做法**：引入 `sharp` 或 `@resvg/resvg-js`，在 `generate-og.js` 里把现有 SVG 渲染成 PNG。**这是本清单里唯一需要新增运行时/构建依赖的项**，请确认可接受再做。改完记得同步 `prerender.js` 里的扩展名。
-
-**验收**
-
-1. `npm run build` 后 `dist/public/og/` 下是 `.png`
-2. 预渲染 HTML 里的 `og:image` 扩展名与之一致，且文件存在
-3. 部署后用 [opengraph.xyz](https://www.opengraph.xyz/) 或微信/Twitter 实际抓一次，能看到图
+彻底解决要自托管。注意 CJK 字体不能直接搬运：Noto Serif SC 全量有十几 MB，
+必须先做子集化（`fonttools` / `cn-font-split`）。**这是个独立任务，别顺手做。**
 
 ---
 
-### 4. sitemap 的 lastmod 用的是发布日期，不是修改时间
+## 环境与配置：踩过的坑（不是待办，是警告）
 
-**证据**：`scripts/generate-feeds.js` 中 `<lastmod>${article.date}</lastmod>`
-
-**问题**：文章更新后 `lastmod` 不变，搜索引擎不知道该重新抓取。
-
-**期望**：`lastmod` 反映内容实际最后修改时间。
-
-**建议做法**：优先读 frontmatter 的 `updated` 字段（需在 `validate-article.js` 里允许该可选字段），没有就回落到源文件的 mtime（`fs.statSync(sourcePath).mtime`）。注意 mtime 在 CI 上是 checkout 时间，不可靠——**推荐用 frontmatter 显式字段**。
-
-**验收**：给某篇文章加 `updated: "2026-08-01"`，构建后 sitemap 中该条 `lastmod` 为该日期，其余不变。
-
----
-
-### 5. RSS 只有摘要，没有正文
-
-**证据**：`dist/public/rss.xml` 中 `content:encoded` 出现 0 次
-
-**问题**：RSS 阅读器里只能看到一句描述，读者必须跳转，订阅价值低。
-
-**期望**：加 `<content:encoded><![CDATA[...]]></content:encoded>`，内容为文章正文（Markdown 转 HTML）。
-
-**建议做法**：`generate-feeds.js` 里读 `client/public/articles/${slug}.md`，剥掉 frontmatter，用 `marked` 或 `remark` 转 HTML。记得在 `<rss>` 上加 `xmlns:content="http://purl.org/rss/1.0/modules/content/"` 命名空间。
-
-**验收**：`python3 -c "import xml.dom.minidom;xml.dom.minidom.parse('dist/public/rss.xml')"` 仍能解析；随便找个 RSS 阅读器订阅能看到全文。
-
----
-
-### 6. sitemap 缺少标签页，且标签页当前不可被独立索引
-
-**证据**
-
-- `dist/public/sitemap.xml` 共 15 条，只有 4 个静态页 + 11 篇文章
-- `client/src/components/SEO.tsx:113` — canonical 固定去掉查询串
-
-**问题**：归档页用 `?tag=React` 做筛选，但 canonical 统一指向 `/archive`，所以标签页既不在 sitemap 里、也不会被单独收录。
-
-**这是一个待决策项，不是明确的 bug**：
-
-- 若**不希望**标签页被收录（避免薄内容页）→ 当前行为正确，**什么都不用做**，只需在 `SEO.tsx:113` 补一行注释说明这是有意为之
-- 若**希望**被收录 → 需要改成路径路由 `/tag/:name`（而不是查询串），补预渲染、补 sitemap、canonical 指向该路径
-
-**请先与作者确认取向再动手。**
-
----
-
-### 7. 未找到的文章没有 noindex
-
-**证据**：`client/src/components/SEO.tsx` 中无任何 `robots` meta
-
-**问题**：`/article/<不存在的slug>` 返回 HTTP 200 + SPA 外壳（这是刻意设计，见第 11 项），前端渲染「文章未找到」。搜索引擎可能把这类软 404 页面收录。
-
-**期望**：`SEO` 组件支持 `noindex?: boolean`，为 true 时写入 `<meta name="robots" content="noindex">`；`Article.tsx` 的 notFound 分支和 `NotFound.tsx` 都传 true。
-
-**注意**：`SEO.tsx` 现在有一套「切换页面时清理上一页残留标签」的机制（`removeMetaByName` / `removeMetaByProperty`）。新增的 robots 标签**必须一并纳入清理**，否则从 404 页跳到正常页会残留 noindex——那会导致正常页面被移出索引，后果比现在严重。
-
-**验收**：新增导航测试——先渲染 `noindex`，再渲染普通页面，断言 `meta[name="robots"]` 已被移除。测试写法可参考 `tests/f8_seo_feeds.test.tsx` 里现有的「SPA 导航」用例。
-
----
-
-## P2 — 性能与体验
-
-### 8. 图片未声明尺寸，造成布局偏移（CLS）
-
-**证据**：8 处 `<img>` 无 `width`/`height`
-
-| 文件                                 | 数量 |
-| ------------------------------------ | ---- |
-| `client/src/pages/Home.tsx`          | 4    |
-| `client/src/components/Markdown.tsx` | 2    |
-| `client/src/pages/About.tsx`         | 1    |
-| `client/src/pages/Article.tsx`       | 1    |
-
-**期望**：给固定尺寸的图（头像、hero）加显式 `width`/`height`；正文图片用 `aspect-ratio` CSS 占位。
-
-**验收**：Lighthouse 的 CLS 指标改善，目标 < 0.1。
-
----
-
-### 9. 构建产物有 332 个 JS 分片
-
-**证据**：`ls dist/public/assets/*.js | wc -l` → 332
-
-**问题**：绝大多数是 `react-syntax-highlighter` 的按需语言包。虽然懒加载不影响首屏，但产物文件数量过多，部署与缓存管理都变重。
-
-**期望**：只注册文章里实际用到的语言。
-
-**建议做法**：`client/src/components/Markdown.tsx` 目前用 `prism-async-light` 自动按需加载。改为显式 `registerLanguage` 白名单——先统计现有文章用到的语言：
-
-````bash
-grep -ohE '^```[a-z]+' articles/*.md | sort | uniq -c | sort -rn
-````
-
-**验收**：分片数显著下降；随便打开几篇含代码的文章，高亮仍正常（`tests/f3_markdown.test.tsx` 有高亮用例，必须仍过）。
-
----
-
-### 10. 未适配 prefers-reduced-motion
-
-**证据**：`client/src/index.css` 中 `prefers-reduced-motion` 出现 0 次
-
-**问题**：站点动画较多（`animate-pulse` 光环、`animate-line` 标题逐行入场、滚动淡入、hover 缩放）。对前庭功能敏感的用户，系统里开了「减少动态效果」也无效。
-
-**期望**：在 `client/src/index.css` 末尾加全局兜底：
-
-```css
-@media (prefers-reduced-motion: reduce) {
-  *,
-  *::before,
-  *::after {
-    animation-duration: 0.01ms !important;
-    animation-iteration-count: 1 !important;
-    transition-duration: 0.01ms !important;
-    scroll-behavior: auto !important;
-  }
-}
-```
-
-**注意**：`useInView` 的滚动淡入是靠 `opacity-0 → opacity-100` 实现的。如果动画被禁用，要确认内容**最终仍然可见**，不能停在 `opacity-0`。
-
-**验收**：macOS 系统设置勾选「减弱动态效果」后访问，页面无动画且**所有内容可见**。
-
----
-
-## P3 — 内容与维护
-
-### 11. ⚠️ 路由配置的历史教训（不是待办，是警告）
+### 11. ⚠️ 路由配置的历史教训
 
 `vercel.json` 当前配置：
 
@@ -270,52 +118,62 @@ grep -ohE '^```[a-z]+' articles/*.md | sort | uniq -c | sort -rn
 | `/article/advent-of-claude-2025` | 200，title 为文章标题（不是「邢鹏的博客」） |
 | `/writings`                      | 200，SPA 外壳                               |
 | `/article/does-not-exist`        | 200，SPA 外壳（前端渲染 NotFound）          |
-| `/og/nope.svg`                   | 404，且**不是** HTML                        |
+| `/og/nope.png`                   | 404，且**不是** HTML                        |
+| `/robots.txt`                    | 200，纯文本，且 `Sitemap:` 是真实域名       |
 
 `curl -s <url> | grep '<title>'` 即可验证。**只看配置文件推不出结果。**
 
----
+### 13. 仓库曾位于 iCloud 同步目录下 ✅ 已解决（2026-08-09）
 
-### 12. 实习经历的地点与机构名不匹配（需作者确认）
+**现状**：仓库已从 `~/Desktop/blog` 迁至 **`~/code/blog`**，脱离 iCloud 同步。
+**不要再把它放回 `~/Desktop` 或 `~/Documents`**——那两个目录默认参与 iCloud 同步。
 
-**证据**：`client/src/pages/About.tsx:149` — `"绥化正达律师事务所 · 上海"`
+迁移前后对比（同一台机器、同一份代码）：
 
-绥化在黑龙江，标注却是上海。三种可能：该所在上海有办公室（保持现状）／实习地点在绥化（改成「· 绥化」）／机构全名另有前缀。**必须问作者，不要自行猜测修改。**
+| 操作           | iCloud 目录下                                          | `~/code/blog`                    |
+| -------------- | ------------------------------------------------------ | -------------------------------- |
+| `npm ci`       | 数分钟，时常卡住                                       | **7 秒**                         |
+| `npm run lint` | **15 分钟**                                            | 数秒                             |
+| `npm test`     | **永久卡死**（0% CPU，worker 全阻塞在 I/O，只能 kill） | **2.4 秒**（549% CPU，真正并行） |
+| CI 六步全跑    | 无法完成                                               | **约 15 秒**                     |
 
----
+迁移过程中还暴露了一点：直接 `mv ~/Desktop/blog ~/code/blog` 会 **`Operation timed out`**。
+因为 `~/Desktop` 归 iCloud fileprovider 管，跨出去不是同卷改名而是真实拷贝，
+654MB / 十万个小文件扛不住。正确顺序是**先删 `node_modules` 与 `dist`**（降到 68MB）再移动。
 
-### 13. 仓库位于 iCloud 同步目录下
-
-**证据**：仓库路径为 `~/Desktop/blog`，macOS 桌面默认参与 iCloud 同步。
-
-**已造成过两次真实故障**：
+**曾造成过三次真实故障**（保留作为不要搬回去的理由）：
 
 1. `node_modules` 内文件进入不一致状态，`lru-cache` 的 CJS 入口 require 后返回空对象，**整个测试套件无法收集**（9 个 error，0 个测试）——重装 `node_modules` 才恢复
 2. iCloud 在 `.git/refs/heads/` 下生成了 `main 2`、以及 `.git/index 2`，含空格的 ref 名导致 **`git push` 直接失败**（`bad object refs/heads/main 2`）
+3. **2026-08-09**：`npm test` 与 `npm run lint` 双双卡死——进程存活、CPU 0%、十余分钟零输出，vitest 的 9 个 worker 全部阻塞在 I/O。同时 `dist/public/assets/` 下出现了 `index-Dj4Aw-tf 2.js` 冲突副本。当时用 `--no-file-parallelism` 绕过，迁移后不再需要
 
 此外还批量生成过 11 个 `* 2.*` 冲突副本，其中两个进了 `articles/`，导致 `articles.json` 从 11 条变 13 条、多出带空格的 slug。**这一类现在有 `validate-article.js` 兜底，但 `node_modules` 与 `.git` 不在校验范围内。**
 
-**建议**：`mv ~/Desktop/blog ~/code/blog`（需作者操作）。这是根治办法，属于环境问题而非代码问题。
-
 ---
 
-## 优先级汇总
+## 已完成（2026-08-09）
 
-| #   | 事项            | 优先级 | 是否需新增依赖  | 是否需作者决策 |
-| --- | --------------- | ------ | --------------- | -------------- |
-| 1   | 主题闪烁 FOUC   | P0     | 否              | 否             |
-| 2   | 邮箱格式校验    | P0     | 可选（zod）     | 否             |
-| 3   | OG 图转 PNG     | P1     | **是**（sharp） | 是             |
-| 4   | sitemap lastmod | P1     | 否              | 否             |
-| 5   | RSS 全文        | P1     | 是（marked）    | 否             |
-| 6   | 标签页收录      | P1     | 否              | **是（取向）** |
-| 7   | 404 noindex     | P1     | 否              | 否             |
-| 8   | 图片尺寸 / CLS  | P2     | 否              | 否             |
-| 9   | 收窄 prism 语言 | P2     | 否              | 否             |
-| 10  | reduced-motion  | P2     | 否              | 否             |
-| 11  | 路由改动警告    | —      | —               | —              |
-| 12  | 实习地点        | P3     | 否              | **是**         |
-| 13  | 移出 iCloud     | P3     | 否              | **是**         |
-
-**建议顺序**：1 → 2 → 7 → 10 → 8 → 4 → 5 → 9 → 3（3 涉及新依赖，放最后）。
-6、12、13 先问作者。
+| #   | 事项                       | 落点                                                                                                                              |
+| --- | -------------------------- | --------------------------------------------------------------------------------------------------------------------------------- |
+| 1   | 主题闪烁 FOUC              | `client/index.html` 头部阻塞式内联脚本，优先级与 `ThemeContext` 一致                                                              |
+| 2   | 邮箱格式校验               | `client/src/lib/validation.ts`，Contact 行内报错 + Newsletter 共用                                                                |
+| 3   | OG 图转 PNG                | `generate-og.js` 用 sharp 渲染；`prerender.js` 扩展名同步                                                                         |
+| 4   | sitemap lastmod            | frontmatter 可选 `updated` 字段，回落到 `date`                                                                                    |
+| 5   | RSS 全文                   | `content:encoded` + `xmlns:content`；站内链接经 `absolutizeLinks` 绝对化                                                          |
+| 6   | 标签页收录                 | 决策为**不单独收录**，`SEO.tsx` 已注释说明这是有意为之                                                                            |
+| 7   | 404 noindex                | `SEO` 新增 `noindex`，已纳入标签清理机制；Article/NotFound 都传                                                                   |
+| 8   | 图片尺寸 / CLS             | 固定尺寸图（头像、hero、卡片）已加 `width`/`height`；正文图见 D 项                                                                |
+| 9   | 收窄 prism 语言            | `PrismLight` + 白名单，**332 → 25 个 JS 分片**；构建期护栏防静默降级                                                              |
+| 10  | reduced-motion             | `index.css` 全局兜底，duration 用 0.01ms 保证动画仍到达终态                                                                       |
+| 12  | 实习经历地点不匹配         | 该条目已从时间线移除，改为蔚来法务实习                                                                                            |
+| —   | robots.txt 的 Sitemap 声明 | 此前是注释掉的占位域名；改为构建期生成，域名从 `VITE_SITE_URL` 取                                                                 |
+| —   | 移动端禁止缩放             | 移除 viewport 的 `maximum-scale=1`（WCAG 1.4.4）                                                                                  |
+| —   | 字体 preload 失效          | preload URL 与实际引用不一致，已统一并改为异步加载                                                                                |
+| —   | Service Worker 图片缓存    | `/images/` 不带内容哈希，cache-first 改为 stale-while-revalidate                                                                  |
+| —   | 缺少 CSP                   | `vercel.json` 新增，说明见 README                                                                                                 |
+| —   | 主题固化                   | `ThemeContext` 不再在挂载时无条件写 localStorage，只在用户显式切换时写                                                            |
+| —   | 搜索对键盘用户不可用       | cmdk 的回车只调 `onSelect`、不合成 click，此前靠 `<Link>` 冒泡跳转的写法让回车只关弹窗。跳转移入 `onSelect`，回归测试 `tests/f13` |
+| —   | 搜索不覆盖标签             | `searchableText()` 统一自有过滤与 `CommandItem` 的 `value`，否则新增字段会被 cmdk 二次过滤丢掉                                    |
+| —   | Cmd+K 可能弹两个对话框     | `SearchButton` 在 Layout 里有两处，各自带弹窗与监听。弹窗与快捷键收归 Layout 独家持有                                             |
+| —   | Toast 主题跟随系统而非站点 | `ui/sonner.tsx` 原从 `next-themes` 取主题（本项目无该 Provider，恒回退 `system`），改用自有 `ThemeContext`；顺带移除该依赖        |
+| —   | giscus 配置写死            | README 记的 `VITE_GISCUS_*` 此前无人读取，现改为环境变量优先、原配置兜底                                                          |

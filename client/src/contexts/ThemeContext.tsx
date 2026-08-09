@@ -33,14 +33,17 @@ export function ThemeProvider({
     return defaultTheme;
   });
 
+  // 只同步 <html> 上的 class，不写 localStorage。
+  // 挂载时无条件写入会把「跟随系统偏好」的首次访客固化成当时的值，
+  // 之后他改系统主题就不再生效了——只有用户显式切换时才应该落盘。
   useEffect(() => {
     const root = document.documentElement;
     root.classList.remove("light", "dark");
     root.classList.add(theme);
-    localStorage.setItem("theme", theme);
   }, [theme]);
 
   const setTheme = (newTheme: Theme) => {
+    localStorage.setItem("theme", newTheme);
     setThemeState(newTheme);
   };
 

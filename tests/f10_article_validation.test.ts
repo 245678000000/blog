@@ -86,6 +86,23 @@ describe("F10: 文章内容校验（构建期护栏）", () => {
     ).toContain("不是合法日期");
   });
 
+  it("updated 字段为合法日期时应通过，非法日期必须报错", () => {
+    // 合法 updated
+    expect(
+      validateArticle(makeArgs({ data: { updated: "2026-08-01" } }))
+    ).toEqual([]);
+    // 非法 updated
+    expect(
+      validateArticle(makeArgs({ data: { updated: "not-a-date" } })).join()
+    ).toContain("updated 不是合法日期");
+  });
+
+  it("updated 字段未提供时应通过（可选字段）", () => {
+    expect(validateArticle(makeArgs({ data: { updated: undefined } }))).toEqual(
+      []
+    );
+  });
+
   it("tags 不是字符串数组必须报错", () => {
     expect(
       validateArticle(makeArgs({ data: { tags: "不是数组" } })).join()

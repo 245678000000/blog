@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Mail, Check } from "lucide-react";
 import { toast } from "sonner";
+import { isValidEmail } from "@/lib/validation";
 
 export function Newsletter() {
   const [email, setEmail] = useState("");
@@ -13,7 +14,7 @@ export function Newsletter() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!email || !email.includes("@")) {
+    if (!isValidEmail(email)) {
       toast.error("请输入有效的邮箱地址");
       return;
     }

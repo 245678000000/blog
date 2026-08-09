@@ -1,10 +1,12 @@
 /**
- * 构建时为每篇文章生成 OG Image (SVG 格式, 1200x630)
- * SVG 被大多数社交平台支持为 OG 图片
+ * 构建时为每篇文章生成 OG Image (PNG 格式, 1200x630)
+ * SVG 虽然可以生成，但 Twitter/X、Facebook、微信、Telegram 均不支持
+ * SVG 作为 og:image，因此用 sharp 把 SVG 渲染成 PNG。
  */
 import fs from "fs";
 import path from "path";
 import { fileURLToPath } from "url";
+import sharp from "sharp";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -75,16 +77,14 @@ function generateOgSvg(article) {
 </svg>`;
 }
 
-// 为每篇文章生成 OG 图片
-let count = 0;
-for (const article of publishedArticles) {
-  const svg = generateOgSvg(article);
-  fs.writeFileSync(path.join(outputDir, `${article.slug}.svg`), svg);
-  count++;
+// 用 sharp 把 SVG 字符串渲染成 PNG buffer（1200x630）
+async function svgToPng(svg) {
+  return sharp(Buffer.from(svg)).resize(1200, 630).png().toBuffer();
 }
 
 // 生成首页默认 OG 图片
-const defaultSvg = `<?xml version="1.0" encoding="UTF-8"?>
+function generateDefaultSvg() {
+  return `<?xml version="1.0" encoding="UTF-8"?>
 <svg width="1200" height="630" viewBox="0 0 1200 630" xmlns="http://www.w3.org/2000/svg">
   <rect width="1200" height="630" fill="#1a2420"/>
   <rect x="80" y="260" width="60" height="4" fill="#c9a84c"/>
@@ -93,7 +93,30 @@ const defaultSvg = `<?xml version="1.0" encoding="UTF-8"?>
   <text x="80" y="400" font-family="sans-serif" font-size="28" fill="#8a9a8e">用 Code 和 AI 解决问题，拒绝空谈。</text>
   <rect x="0" y="620" width="1200" height="10" fill="#c9a84c" opacity="0.6"/>
 </svg>`;
-fs.writeFileSync(path.join(outputDir, "default.svg"), defaultSvg);
-count++;
+}
 
-console.log(`✅ Generated ${count} OG images (SVG)`);
+// 为每篇文章生成 PNG OG 图片
+let count = 0;
+const tasks = [];
+
+for (const article of publishedArticles) {
+  const svg = generateOgSvg(article);
+  tasks.push(
+    svgToPng(svg).then(pngBuffer => {
+      fs.writeFileSync(path.join(outputDir, `${article.slug}.png`), pngBuffer);
+      count++;
+    })
+  );
+}
+
+// 生成首页默认 OG 图片（PNG）
+tasks.push(
+  svgToPng(generateDefaultSvg()).then(pngBuffer => {
+    fs.writeFileSync(path.join(outputDir, "default.png"), pngBuffer);
+    count++;
+  })
+);
+
+await Promise.all(tasks);
+
+console.log(`✅ Generated ${count} OG images (PNG)`);
