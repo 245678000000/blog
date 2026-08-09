@@ -36,7 +36,10 @@ npm run test:e2e     # Playwright E2E 测试
 - 不要硬编码域名，用 `import.meta.env.VITE_SITE_URL`
 - 不要直接改 `client/public/articles/articles.json`（由 sync 生成）
 - 不要用中文做文章 slug
-- 不要删除 `vercel.json` 中的安全头配置（含 CSP，改第三方依赖时要同步改，见 README）
+- 不要删除 `vercel.json` 中的安全头配置（含 CSP/HSTS，改第三方依赖时要同步改，见 README）
+- 不要往 `script-src` 里加 `'unsafe-inline'`（它会让 sha256 白名单整个失效）
+- 不要在 `index.html` 的标签上写内联事件属性（`onload=` 之类，hash 覆盖不到）
+- 不要给路径不带内容哈希的资源加 `immutable`（换图后老访客永远看不到新的）
 - 不要在 `client/public/` 下放 `robots.txt`（由 `generate-feeds.js` 构建期生成）
 - 不要给正文 `<img>` 写死 `aspect-ratio`（默认 `object-fit: fill`，会把插图拉变形）
 
@@ -64,6 +67,15 @@ npm run test:e2e     # Playwright E2E 测试
   改任何一边的字段都要同步改另一边，否则爬虫执行 JS 前后读到两份不同的数据
 - 同一份内容挂多个路径时用 `SEO` 的 `canonicalPath` 钉住权威地址
   （`/writings` 与 `/` 就是这么处理的），不要让两个地址各自 canonical
+
+## CSP 内联脚本哈希
+
+`client/index.html` 里只有**一段**内联脚本（主题初始化 + 字体加载 + SW 注册），
+`vercel.json` 的 `script-src` 写死它的 sha256，不开 `'unsafe-inline'`。
+
+**改那段脚本必须同步更新哈希。** 漏改是静默失败：脚本被浏览器拦掉，页面照常渲染，
+只是主题闪烁回来、SW 不再注册，而且 dev 服务器不发 CSP，本地永远发现不了。
+`tests/f17` 和构建期的 `scripts/check-csp.js` 会拦下来，取新哈希的命令见 README。
 
 ## 代码块语言白名单
 

@@ -5,7 +5,7 @@
   "license": "MIT",
   "scripts": {
     "dev": "npm run sync && vite --host",
-    "build": "npm run sync && vite build && node scripts/optimize-images.js && node scripts/generate-feeds.js && node scripts/generate-og.js && node scripts/prerender.js",
+    "build": "npm run sync && vite build && node scripts/optimize-images.js && node scripts/generate-feeds.js && node scripts/generate-og.js && node scripts/prerender.js && node scripts/check-csp.js",
     "sync": "node scripts/sync-articles.js",
     "preview": "vite preview --host",
     "check": "tsc --noEmit",

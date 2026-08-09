@@ -2,10 +2,57 @@
 <html lang="zh-CN">
   <head>
     <meta charset="UTF-8" />
-    <meta
-      name="viewport"
-      content="width=device-width, initial-scale=1.0, maximum-scale=1"
-    />
+    <!-- 不要加 maximum-scale / user-scalable=no：那会禁掉移动端双指缩放，
+         违反 WCAG 1.4.4（内容必须能放大到 200%）。 -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <!-- 全站唯一的内联脚本。CSP 的 script-src 不带 'unsafe-inline'，
+         靠的是 vercel.json 里写死这段代码的 sha256。
+         改动这里（哪怕只是空格）都必须同步更新那个哈希，否则脚本会被浏览器
+         静默拦掉：主题闪烁回来、Service Worker 不再注册。
+         tests/f17 会重新算一遍并比对，漏改跑测试就会红。 -->
+    <script>
+      // 1) 阻塞式主题初始化：必须在样式表加载前执行，否则深色模式用户每次硬加载
+      //    都会先看到亮色再闪成深色（FOUC）。优先级与 ThemeContext 保持一致：
+      //    localStorage → 系统偏好 → dark。
+      (function () {
+        try {
+          var t = localStorage.getItem("theme");
+          if (t !== "light" && t !== "dark") {
+            t = window.matchMedia("(prefers-color-scheme: light)").matches
+              ? "light"
+              : "dark";
+          }
+          document.documentElement.classList.add(t);
+        } catch (e) {
+          document.documentElement.classList.add("dark");
+        }
+      })();
+
+      // 2) 字体异步加载。此前是 <link rel="preload" onload="..."> ——
+      //    内联事件属性不受 sha256 覆盖（那要开 'unsafe-hashes'），
+      //    所以改成在这里建元素。media="print" 让它不阻塞渲染，
+      //    加载完再翻成 all；fonts.googleapis.com 在部分网络下会直接超时，
+      //    作为阻塞资源会把首屏一起拖死。
+      (function () {
+        var l = document.createElement("link");
+        l.rel = "stylesheet";
+        l.href =
+          "https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;700&family=Noto+Sans+SC:wght@400;700&family=JetBrains+Mono:wght@400&display=swap";
+        l.media = "print";
+        l.addEventListener("load", function () {
+          l.media = "all";
+        });
+        document.head.appendChild(l);
+      })();
+
+      // 3) Service Worker（PWA 离线阅读）。原本是 </body> 前的第二段内联脚本，
+      //    合并进来只是为了让全站只剩一个需要维护哈希的地方。
+      if ("serviceWorker" in navigator) {
+        window.addEventListener("load", function () {
+          navigator.serviceWorker.register("/sw.js");
+        });
+      }
+    </script>
     <title>邢鹏的博客</title>
 
     <!-- 默认 SEO Meta 标签 (供爬虫首次抓取) -->
@@ -27,7 +74,9 @@
       content="法学硕士 | AI Native 开发者 | Prompt 工程师。用 Code 和 AI 工具解决真实世界问题。"
     />
     <meta property="og:site_name" content="邢鹏的博客" />
-    <meta property="og:image" content="/images/hero-bg.jpg" />
+    <!-- scripts/generate-og.js 产出的品牌卡片；prerender.js 会把这里的相对路径
+         改写成绝对 URL（抓取器不按当前页解析相对路径）。 -->
+    <meta property="og:image" content="/og/default.png" />
 
     <!-- Twitter Card -->
     <meta name="twitter:card" content="summary_large_image" />
@@ -36,7 +85,7 @@
       name="twitter:description"
       content="法学硕士 | AI Native 开发者 | Prompt 工程师。用 Code 和 AI 工具解决真实世界问题。"
     />
-    <meta name="twitter:image" content="/images/hero-bg.jpg" />
+    <meta name="twitter:image" content="/og/default.png" />
 
     <!-- Favicon -->
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
@@ -53,30 +102,21 @@
       href="/rss.xml"
     />
 
-    <!-- 字体 (优化: 减少权重 + preload 关键字体) -->
+    <!-- 字体：stylesheet 元素由上面那段内联脚本创建（内联事件属性不受 sha256
+         覆盖，写在这里就得开 'unsafe-hashes'）。这里只留连接预热。
+         后续可考虑自托管（CJK 字体需要先做子集化，不是纯搬运）。 -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link
-      rel="preload"
-      as="style"
-      href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@700&display=swap"
-    />
-    <link
-      href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;700&family=Noto+Sans+SC:wght@400;700&family=JetBrains+Mono:wght@400&display=swap"
-      rel="stylesheet"
-    />
+    <noscript>
+      <link
+        rel="stylesheet"
+        href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;700&family=Noto+Sans+SC:wght@400;700&family=JetBrains+Mono:wght@400&display=swap"
+      />
+    </noscript>
   </head>
 
   <body>
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
-    <script>
-      // 注册 Service Worker (PWA 离线阅读)
-      if ("serviceWorker" in navigator) {
-        window.addEventListener("load", () => {
-          navigator.serviceWorker.register("/sw.js");
-        });
-      }
-    </script>
   </body>
 </html>
