@@ -131,8 +131,10 @@ describe("F5: 文章页组件（阅读进度条、社交分享与 Giscus 评论�
     const script = document.querySelector(
       'script[src="https://giscus.app/client.js"]'
     );
+    const container = document.querySelector(".giscus-container");
     expect(script).toBeInTheDocument();
     expect(script).toHaveAttribute("data-repo", "245678000000/blog");
+    expect(container).toHaveClass("w-full", "min-w-0");
   });
 
   it("Tier 1: 评论区未进入视口时不应加载 giscus（第三方请求要等到用户真的滚到底）", () => {

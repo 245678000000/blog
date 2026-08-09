@@ -205,6 +205,17 @@
     animation: fade-in-up 0.6s ease forwards;
   }
 
+  /* Giscus 动态注入的 iframe 没有可靠的宿主宽度样式时会退回浏览器默认的
+   * 300px，桌面端就像一张窄卡片贴在左侧。选择器限定在评论容器内，既让
+   * 外层与 iframe 撑满文章正文，也不影响站内其他第三方 iframe。 */
+  .giscus-container > .giscus,
+  .giscus-container .giscus-frame {
+    display: block;
+    width: 100% !important;
+    min-width: 0;
+    max-width: none !important;
+  }
+
   @keyframes fade-in-up {
     to {
       opacity: 1;
