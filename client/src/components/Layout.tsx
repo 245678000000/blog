@@ -256,8 +256,23 @@ export default function Layout({ children }: { children: React.ReactNode }) {
           <div className="flex flex-col md:flex-row justify-between items-center gap-6 w-full">
             <div className="flex flex-col items-center md:items-start gap-2">
               <span className="text-xl font-serif font-bold">xing peng</span>
-              <p className="text-sm text-muted-foreground">
-                © {new Date().getFullYear()} 邢鹏. All rights reserved.
+              <p className="text-sm text-muted-foreground flex flex-wrap items-center gap-x-3 gap-y-1">
+                <span>
+                  © {new Date().getFullYear()} 邢鹏. All rights reserved.
+                </span>
+                <a
+                  href="https://tin.computer"
+                  className="inline-flex items-center gap-1 hover:text-primary transition-colors"
+                >
+                  <svg
+                    viewBox="0 0 32 32"
+                    className="w-[1em] h-[1em]"
+                    aria-hidden="true"
+                  >
+                    <rect width="32" height="32" fill="#66DC9D" />
+                  </svg>
+                  Growth by Tin
+                </a>
               </p>
             </div>
 

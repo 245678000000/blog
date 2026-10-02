@@ -15,6 +15,7 @@ import { SEO } from "@/components/SEO";
 import { useInView } from "@/hooks/useInView";
 import { cn } from "@/lib/utils";
 import { Newsletter } from "@/components/Newsletter";
+import { HOME_HERO } from "@shared/site.js";
 
 export default function Home() {
   const [articles, setArticles] = useState<Article[]>([]);
@@ -79,7 +80,7 @@ export default function Home() {
             <div className="flex items-center gap-4">
               <div className="h-[1px] w-12 bg-primary"></div>
               <span className="text-sm font-mono tracking-widest uppercase text-primary">
-                Xing Peng
+                {HOME_HERO.eyebrow}
               </span>
             </div>
 
@@ -88,25 +89,24 @@ export default function Home() {
                 className="animate-line block"
                 style={{ animationDelay: "0.2s" }}
               >
-                用 Code 和 AI
+                {HOME_HERO.titleLines[0]}
               </span>
               <span
                 className="animate-line block text-primary italic"
                 style={{ animationDelay: "0.5s" }}
               >
-                解决问题
+                {HOME_HERO.titleLines[1]}
               </span>
               <span
                 className="animate-line block"
                 style={{ animationDelay: "0.8s" }}
               >
-                拒绝空谈。
+                {HOME_HERO.titleLines[2]}
               </span>
             </h1>
 
             <p className="text-xl md:text-2xl text-muted-foreground max-w-2xl leading-relaxed">
-              法学硕士 | AI Native 开发者 | Prompt 工程师。 擅长将 Idea
-              快速转化为 Demo，用结构化思维解决复杂逻辑场景。
+              {HOME_HERO.description}
             </p>
 
             <div className="flex flex-wrap gap-4 mt-4">
@@ -124,7 +124,8 @@ export default function Home() {
                       : "/archive"
                   }
                 >
-                  阅读我的文章 <ArrowRight className="ml-2 h-5 w-5" />
+                  {HOME_HERO.primaryAction}{" "}
+                  <ArrowRight className="ml-2 h-5 w-5" />
                 </Link>
               </Button>
               <Button
