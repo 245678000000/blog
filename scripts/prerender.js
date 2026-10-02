@@ -13,6 +13,7 @@ import {
   SITE_NAME,
   SITE_AUTHOR,
   SITE_DESCRIPTION,
+  HOME_HERO,
   resolveSiteUrl,
   escapeXml,
 } from "../shared/site.js";
@@ -108,6 +109,17 @@ function articlePreview(article) {
   return `<article style="display:none"><h1>${escapeXml(article.title)}</h1><p>${escapeXml(excerpt)}</p></article>`;
 }
 
+// 可见的首页首屏。React 启动后会接管 #root，未执行 JS 的抓取器和读者仍可读到
+// 与客户端同源的标题、描述和实际文章链接。
+function homePreview(featuredArticle) {
+  const articlePath = featuredArticle
+    ? `/article/${encodeURIComponent(featuredArticle.slug)}`
+    : "/archive";
+  const [firstLine, accentLine, lastLine] = HOME_HERO.titleLines.map(escapeXml);
+
+  return `<main id="main-content" class="flex-1 pt-24 pb-16"><section class="relative min-h-[80vh] flex items-center justify-center overflow-hidden"><div class="absolute inset-0 z-0"><img src="/images/hero-bg.jpg" alt="" aria-hidden="true" class="w-full h-full object-cover opacity-40" width="2752" height="1536" fetchpriority="high"><div class="absolute inset-0 bg-gradient-to-b from-background/80 via-background/50 to-background"></div></div><div class="container relative z-10 flex flex-col items-start gap-8 max-w-4xl"><div class="flex items-center gap-4"><div class="h-[1px] w-12 bg-primary"></div><span class="text-sm font-mono tracking-widest uppercase text-primary">${escapeXml(HOME_HERO.eyebrow)}</span></div><h1 class="text-5xl md:text-7xl font-serif font-bold leading-tight"><span class="block">${firstLine}</span><span class="block text-primary italic">${accentLine}</span><span class="block">${lastLine}</span></h1><p class="text-xl md:text-2xl text-muted-foreground max-w-2xl leading-relaxed">${escapeXml(HOME_HERO.description)}</p><a href="${escapeXml(articlePath)}" class="inline-flex items-center justify-center text-lg px-8 py-3 rounded-full bg-primary text-primary-foreground">${escapeXml(HOME_HERO.primaryAction)} →</a></div></section></main>`;
+}
+
 let count = 0;
 
 // ---- 文章页 ----
@@ -156,6 +168,7 @@ fs.writeFileSync(
     fullTitle: siteName,
     description: SITE_DESCRIPTION,
     image: DEFAULT_OG_IMAGE,
+    bodyPreview: homePreview(publishedArticles[0]),
   })
 );
 count++;

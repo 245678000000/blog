@@ -9,6 +9,15 @@ export const SITE_DESCRIPTION =
 export const SITE_DESCRIPTION_SHORT =
   "法学硕士 | AI Native 开发者 | Prompt 工程师";
 
+// 首页 Hero 的文案同时供客户端与构建时静态首屏使用，避免两份内容漂移。
+export const HOME_HERO = {
+  eyebrow: "Xing Peng",
+  titleLines: ["用 Code 和 AI", "解决问题", "拒绝空谈。"],
+  description:
+    "法学硕士 | AI Native 开发者 | Prompt 工程师。 擅长将 Idea 快速转化为 Demo，用结构化思维解决复杂逻辑场景。",
+  primaryAction: "阅读我的文章",
+};
+
 // 未配置 VITE_SITE_URL 时的兜底域名
 export const DEFAULT_SITE_URL = "https://www.tthhhh.ggff.net";
 
